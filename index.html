@@ -199,55 +199,25 @@
   .score-item .del{ background:none; border:none; color:var(--muted); cursor:pointer; font-size:1rem; padding:2px 6px; line-height:1; border-radius:6px; flex-shrink:0; }
   .score-item .del:hover{ color:var(--danger); }
 
-  /* --- flashcards --- */
-  .deck-row{ display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
-  .deck-row select{ flex:1; min-width:140px; }
-  .due-pill{
-    font-family:"IBM Plex Mono", monospace; font-size:0.78rem; color:var(--accent2-ink);
-    background:var(--accent2); padding:4px 10px; border-radius:100px; white-space:nowrap;
-  }
-  .flash-stage{ display:flex; flex-direction:column; align-items:center; gap:16px; }
-  .flashcard{
-    width:100%; max-width:420px; aspect-ratio:16/10; perspective:1200px; cursor:pointer;
-  }
-  .flashcard-inner{
-    position:relative; width:100%; height:100%; transform-style:preserve-3d;
-    transition:transform 0.45s cubic-bezier(.4,.2,.2,1);
-  }
-  .flashcard.flipped .flashcard-inner{ transform:rotateY(180deg); }
-  .face{
-    position:absolute; inset:0; backface-visibility:hidden; border-radius:12px;
-    border:1px solid var(--border); background:var(--surface2);
-    display:flex; align-items:center; justify-content:center; text-align:center;
-    padding:22px; font-family:"Fraunces", serif; font-size:1.3rem; font-weight:500;
-    box-shadow:var(--shadow);
-  }
-  .face.back{ transform:rotateY(180deg); background:var(--accent2); color:var(--accent2-ink); }
-  .flash-hint{ color:var(--muted); font-size:0.8rem; }
-  .rate-row{ display:flex; gap:8px; width:100%; max-width:420px; }
-  .rate-row button{ flex:1; }
-  .rate-again{ background:var(--danger); color:#fff; }
-  .rate-good{ background:var(--surface2); color:var(--ink); border:1px solid var(--border); }
-  .rate-easy{ background:var(--accent2); color:var(--accent2-ink); }
-  .done-state{ text-align:center; padding:32px 10px; color:var(--muted); display:flex; flex-direction:column; gap:6px; align-items:center; }
-  .done-state .big{ font-family:"Fraunces", serif; font-size:1.2rem; color:var(--ink); }
+  /* --- daily quote --- */
+  .quote-card{ text-align:center; }
+  .quote-text{ font-family:"Fraunces", serif; font-style:italic; font-size:1.1rem; }
+  .quote-author{ color:var(--muted); font-size:0.82rem; margin-top:6px; }
 
-  .manage-toggle{ background:none; border:none; color:var(--accent2-ink); font-size:0.82rem; font-weight:600; cursor:pointer; padding:0; margin-top:14px; text-decoration:underline; text-underline-offset:3px; }
-  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .manage-toggle{ color:var(--accent2); } }
-  :root[data-theme="dark"] .manage-toggle{ color:var(--accent2); }
-  .manage-panel{ margin-top:14px; border-top:1px solid var(--border); padding-top:14px; display:flex; flex-direction:column; gap:12px; }
-  .add-card-form{ display:flex; flex-direction:column; gap:8px; }
-  .add-card-form .row{ display:flex; gap:8px; flex-wrap:wrap; }
-  .add-card-form input[type="text"]{ flex:1; min-width:120px; }
-  .card-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; }
-  .card-list li{
-    display:flex; gap:10px; align-items:center; font-size:0.85rem; padding:7px 8px;
-    background:var(--surface2); border-radius:8px;
+  /* --- work log --- */
+  .log-time{ color:var(--muted); font-size:0.74rem; font-family:"IBM Plex Mono",monospace; flex-shrink:0; white-space:nowrap; }
+
+  /* --- weekly summary --- */
+  .week-chart{ display:flex; gap:6px; align-items:flex-end; height:80px; }
+  .week-col{ display:flex; flex-direction:column; align-items:center; gap:4px; flex:1; }
+  .week-bar{ width:100%; max-width:22px; border-radius:4px 4px 0 0; background:var(--accent2); min-height:4px; }
+  .week-label{ font-size:0.68rem; color:var(--muted); }
+
+  /* --- break reminder --- */
+  .break-toggle-row{
+    display:flex; align-items:center; gap:8px; margin-top:14px; font-size:0.82rem; color:var(--muted); cursor:pointer;
   }
-  .card-list li .cf{ flex:1; min-width:0; overflow-wrap:anywhere; }
-  .card-list li .box{ color:var(--muted); font-family:"IBM Plex Mono",monospace; font-size:0.72rem; white-space:nowrap; }
-  .card-list li .del{ background:none; border:none; color:var(--muted); cursor:pointer; font-size:0.95rem; }
-  .card-list li .del:hover{ color:var(--danger); }
+  .break-toggle-row input{ accent-color:var(--accent2); width:16px; height:16px; }
 
   footer{ text-align:center; color:var(--muted); font-size:0.78rem; padding-top:6px; }
 
@@ -308,6 +278,11 @@
       <span class="meta">NotebookLM<span class="sub2">AI-summarized notes & sources</span></span>
     </a>
   </nav>
+
+  <div class="card quote-card">
+    <div class="quote-text" id="quoteText">—</div>
+    <div class="quote-author" id="quoteAuthor">—</div>
+  </div>
 
   <div class="grid">
     <div class="col">
@@ -390,6 +365,10 @@
             <div class="session-dots" id="sessionDots"></div>
           </div>
         </div>
+        <label class="break-toggle-row">
+          <input type="checkbox" id="breakReminderToggle">
+          Remind me to take a break every 50 minutes
+        </label>
       </div>
 
       <div class="card">
@@ -405,26 +384,23 @@
 
     <div class="col">
       <div class="card">
-        <h2>Flashcards</h2>
-        <div class="sub">Rate honestly — it decides when a card comes back.</div>
-        <div class="deck-row">
-          <select id="deckSelect" aria-label="Choose deck"></select>
-          <span class="due-pill" id="duePill">0 due</span>
-        </div>
+        <h2>Work log</h2>
+        <div class="sub">A running record of what you've actually gotten done.</div>
+        <form class="task-form" id="logForm">
+          <input type="text" id="logInput" placeholder="e.g. Finished Ch.5 practice paper" aria-label="Log entry">
+          <button class="btn btn-primary btn-sm" type="submit">Add</button>
+        </form>
+        <ul class="task-list" id="logList"></ul>
+      </div>
 
-        <div class="flash-stage" id="flashStage"></div>
-
-        <button class="manage-toggle" id="manageToggle" type="button">Manage cards in this deck</button>
-        <div class="manage-panel" id="managePanel" hidden>
-          <form class="add-card-form" id="addCardForm">
-            <div class="row">
-              <input type="text" id="cardFront" placeholder="Front (question)" aria-label="Card front">
-              <input type="text" id="cardBack" placeholder="Back (answer)" aria-label="Card back">
-              <button class="btn btn-ghost btn-sm" type="submit">Add card</button>
-            </div>
-          </form>
-          <ul class="card-list" id="cardList"></ul>
+      <div class="card">
+        <h2>Weekly summary</h2>
+        <div class="sub">Focus sessions over the last 7 days.</div>
+        <div class="streak-hero" style="padding-block:0 10px;">
+          <span class="streak-num" id="weekTotal">–</span>
+          <span class="streak-label">sessions this week</span>
         </div>
+        <div class="week-chart" id="weekChart"></div>
       </div>
 
       <div class="card">
@@ -445,7 +421,7 @@
   </div>
 
   <footer>
-    Your decks, tasks, streak and timer settings are saved in this browser only.
+    Your tasks, log, scores, streak and timer settings are saved in this browser only.
     <div style="margin-top:10px; display:flex; gap:10px; justify-content:center;">
       <button class="manage-toggle" id="exportBtn" type="button">Export backup</button>
       <span aria-hidden="true">·</span>
@@ -482,44 +458,45 @@
 
   document.getElementById("todayLine").textContent = new Date().toLocaleDateString(undefined,{weekday:"long", month:"long", day:"numeric"});
 
-  // ---------- default data ----------
-  var BOX_INTERVALS = [0,1,3,7,14]; // days, index = box level
-  function sampleDecks(){
-    var t = todayStr();
-    return [
-      {
-        id:"deck-bio", name:"Cell Biology (example)",
-        cards:[
-          {id:uid(), front:"What organelle produces most of a cell's ATP?", back:"The mitochondrion", box:0, due:t},
-          {id:uid(), front:"What does the Golgi apparatus do?", back:"Packages and modifies proteins for transport", box:1, due:t},
-          {id:uid(), front:"What is the function of the cell membrane?", back:"Controls what enters and leaves the cell", box:0, due:addDays(t,1)}
-        ]
-      },
-      {
-        id:"deck-mtl", name:"Chinese Vocabulary — MTL (example)",
-        cards:[
-          {id:uid(), front:"图书馆 (túshūguǎn)", back:"the library", box:2, due:t},
-          {id:uid(), front:"截止日期 (jiézhǐ rìqī)", back:"the deadline", box:0, due:t},
-          {id:uid(), front:"及格 (jígé)", back:"to pass (an exam)", box:1, due:addDays(t,2)}
-        ]
-      }
-    ];
+  // ================= DAILY QUOTE =================
+  var QUOTES = [
+    {text:"The secret of getting ahead is getting started.", author:"Mark Twain"},
+    {text:"Success is the sum of small efforts repeated day in and day out.", author:"Robert Collier"},
+    {text:"It always seems impossible until it's done.", author:"Nelson Mandela"},
+    {text:"Don't watch the clock; do what it does — keep going.", author:"Sam Levenson"},
+    {text:"Well done is better than well said.", author:"Benjamin Franklin"},
+    {text:"You don't have to be great to start, but you have to start to be great.", author:"Zig Ziglar"},
+    {text:"Discipline is choosing between what you want now and what you want most.", author:"Abraham Lincoln"},
+    {text:"The expert in anything was once a beginner.", author:"Helen Hayes"},
+    {text:"Small daily improvements are the key to staggering long-term results.", author:"James Clear"},
+    {text:"Focus on being productive instead of busy.", author:"Tim Ferriss"},
+    {text:"A little progress each day adds up to big results.", author:"Anonymous"},
+    {text:"The pain of discipline weighs ounces; the pain of regret weighs tons.", author:"Jim Rohn"},
+    {text:"Study while others are sleeping; work while others are loafing.", author:"William A. Ward"},
+    {text:"You are capable of more than you know.", author:"Anonymous"},
+    {text:"Don't wish it were easier; wish you were better.", author:"Jim Rohn"}
+  ];
+  function dayOfYear(){
+    var now = new Date();
+    var start = new Date(now.getFullYear(), 0, 0);
+    return Math.floor((now - start) / 86400000);
   }
+  var todaysQuote = QUOTES[dayOfYear() % QUOTES.length];
+  document.getElementById("quoteText").textContent = "“" + todaysQuote.text + "”";
+  document.getElementById("quoteAuthor").textContent = "— " + todaysQuote.author;
+
+  // ---------- default data ----------
   function sampleTasks(){
     return [
-      {id:uid(), text:"Review Ch. 4 flashcards before class", done:false},
+      {id:uid(), text:"Review Ch. 4 notes before class", done:false},
       {id:uid(), text:"Draft outline for history essay", done:false},
       {id:uid(), text:"Skim lecture slides from Monday", done:true}
     ];
   }
 
-  var decks = loadJSON("sd_decks", null);
-  if(!decks){ decks = sampleDecks(); saveJSON("sd_decks", decks); }
   var tasks = loadJSON("sd_tasks", null);
   if(!tasks){ tasks = sampleTasks(); saveJSON("sd_tasks", tasks); }
-  var selectedDeckId = loadJSON("sd_selected_deck", decks[0] ? decks[0].id : null);
 
-  function persistDecks(){ saveJSON("sd_decks", decks); }
   function persistTasks(){ saveJSON("sd_tasks", tasks); }
 
   // ================= TASKS =================
@@ -580,6 +557,122 @@
   });
 
   renderTasks();
+
+  // ================= WORK LOG =================
+  function sampleLog(){
+    return [
+      {id:uid(), text:"Finished annotating Chapter 3 notes (example)", ts: Date.now() - 86400000}
+    ];
+  }
+  var workLog = loadJSON("sd_work_log", null);
+  if(!workLog){ workLog = sampleLog(); saveJSON("sd_work_log", workLog); }
+  function persistLog(){ saveJSON("sd_work_log", workLog); }
+
+  var logForm = document.getElementById("logForm");
+  var logInput = document.getElementById("logInput");
+  var logList = document.getElementById("logList");
+
+  function fmtLogDate(ts){
+    var d = new Date(ts);
+    return d.toLocaleDateString(undefined,{month:"short", day:"numeric"}) + " · " + d.toLocaleTimeString(undefined,{hour:"numeric", minute:"2-digit"});
+  }
+
+  function renderLog(){
+    logList.innerHTML = "";
+    if(workLog.length === 0){
+      var empty = document.createElement("li");
+      empty.className = "task-empty";
+      empty.textContent = "Nothing logged yet — add what you get done as you go.";
+      logList.appendChild(empty);
+      return;
+    }
+    workLog.slice().sort(function(a,b){ return b.ts - a.ts; }).forEach(function(entry){
+      var li = document.createElement("li");
+      li.className = "task-item";
+
+      var txt = document.createElement("span");
+      txt.className = "txt";
+      txt.textContent = entry.text;
+
+      var time = document.createElement("span");
+      time.className = "log-time";
+      time.textContent = fmtLogDate(entry.ts);
+
+      var del = document.createElement("button");
+      del.className = "del";
+      del.type = "button";
+      del.setAttribute("aria-label", "Delete log entry");
+      del.textContent = "✕";
+      del.addEventListener("click", function(){
+        workLog = workLog.filter(function(x){ return x.id !== entry.id; });
+        persistLog();
+        renderLog();
+      });
+
+      li.appendChild(txt);
+      li.appendChild(time);
+      li.appendChild(del);
+      logList.appendChild(li);
+    });
+  }
+
+  logForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    var val = logInput.value.trim();
+    if(!val) return;
+    workLog.push({id: uid(), text: val, ts: Date.now()});
+    persistLog();
+    logInput.value = "";
+    renderLog();
+  });
+
+  renderLog();
+
+  // ================= WEEKLY SUMMARY =================
+  var weekTotal = document.getElementById("weekTotal");
+  var weekChart = document.getElementById("weekChart");
+
+  function loadSessionHistory(){
+    return loadJSON("sd_session_history", {});
+  }
+  function bumpSessionHistory(dateStr){
+    var hist = loadSessionHistory();
+    hist[dateStr] = (hist[dateStr] || 0) + 1;
+    saveJSON("sd_session_history", hist);
+  }
+
+  function renderWeeklySummary(){
+    var hist = loadSessionHistory();
+    var days = [];
+    var total = 0;
+    for(var i = 6; i >= 0; i--){
+      var d = addDays(todayStr(), -i);
+      var count = hist[d] || 0;
+      total += count;
+      days.push({date:d, count:count});
+    }
+    weekTotal.textContent = total;
+    weekChart.innerHTML = "";
+    var max = 1;
+    days.forEach(function(d){ if(d.count > max) max = d.count; });
+    days.forEach(function(d){
+      var col = document.createElement("div");
+      col.className = "week-col";
+      var bar = document.createElement("div");
+      bar.className = "week-bar";
+      bar.style.height = Math.max(4, Math.round((d.count / max) * 56)) + "px";
+      bar.setAttribute("aria-hidden", "true");
+      var label = document.createElement("div");
+      label.className = "week-label";
+      label.textContent = new Date(d.date + "T00:00:00").toLocaleDateString(undefined,{weekday:"narrow"});
+      col.setAttribute("title", d.count + (d.count === 1 ? " session" : " sessions"));
+      col.appendChild(bar);
+      col.appendChild(label);
+      weekChart.appendChild(col);
+    });
+  }
+
+  renderWeeklySummary();
 
   // ================= EXAM SCORES =================
   function sampleScores(){
@@ -694,206 +787,6 @@
   });
 
   renderScores();
-
-  // ================= FLASHCARDS =================
-  var deckSelect = document.getElementById("deckSelect");
-  var duePill = document.getElementById("duePill");
-  var flashStage = document.getElementById("flashStage");
-  var manageToggle = document.getElementById("manageToggle");
-  var managePanel = document.getElementById("managePanel");
-  var addCardForm = document.getElementById("addCardForm");
-  var cardFrontInput = document.getElementById("cardFront");
-  var cardBackInput = document.getElementById("cardBack");
-  var cardListEl = document.getElementById("cardList");
-
-  var studyQueue = [];
-  var currentCard = null;
-  var isFlipped = false;
-
-  function currentDeck(){
-    return decks.find(function(d){ return d.id === selectedDeckId; }) || decks[0];
-  }
-
-  function renderDeckSelect(){
-    deckSelect.innerHTML = "";
-    decks.forEach(function(d){
-      var opt = document.createElement("option");
-      opt.value = d.id;
-      opt.textContent = d.name + " (" + d.cards.length + ")";
-      if(d.id === selectedDeckId) opt.selected = true;
-      deckSelect.appendChild(opt);
-    });
-  }
-
-  function buildQueue(){
-    var deck = currentDeck();
-    var t = todayStr();
-    studyQueue = deck ? deck.cards.filter(function(c){ return c.due <= t; }).slice() : [];
-    duePill.textContent = studyQueue.length + " due";
-  }
-
-  function nextCard(){
-    isFlipped = false;
-    currentCard = studyQueue.length ? studyQueue[0] : null;
-    renderFlashStage();
-  }
-
-  function renderFlashStage(){
-    flashStage.innerHTML = "";
-    if(!currentDeck() || currentDeck().cards.length === 0){
-      var empty = document.createElement("div");
-      empty.className = "done-state";
-      empty.innerHTML = '<div class="big">No cards yet</div><div>Add your first card below to start studying this deck.</div>';
-      flashStage.appendChild(empty);
-      return;
-    }
-    if(!currentCard){
-      var done = document.createElement("div");
-      done.className = "done-state";
-      done.innerHTML = '<div class="big">All caught up ✓</div><div>Nothing due in this deck right now. Nice work.</div>';
-      flashStage.appendChild(done);
-      return;
-    }
-    var wrap = document.createElement("div");
-    wrap.className = "flashcard" + (isFlipped ? " flipped" : "");
-    wrap.setAttribute("role", "button");
-    wrap.setAttribute("tabindex", "0");
-    wrap.setAttribute("aria-pressed", isFlipped ? "true" : "false");
-    wrap.setAttribute("aria-label", isFlipped ? "Answer: " + currentCard.back + ". Press to show question." : "Question: " + currentCard.front + ". Press to reveal answer.");
-    wrap.innerHTML =
-      '<div class="flashcard-inner">' +
-        '<div class="face front">' + escapeHtml(currentCard.front) + '</div>' +
-        '<div class="face back">' + escapeHtml(currentCard.back) + '</div>' +
-      '</div>';
-    function flipCard(){
-      isFlipped = !isFlipped;
-      wrap.classList.toggle("flipped", isFlipped);
-      wrap.setAttribute("aria-pressed", isFlipped ? "true" : "false");
-      wrap.setAttribute("aria-label", isFlipped ? "Answer: " + currentCard.back + ". Press to show question." : "Question: " + currentCard.front + ". Press to reveal answer.");
-      rateRow.style.visibility = isFlipped ? "visible" : "hidden";
-    }
-    wrap.addEventListener("click", flipCard);
-    wrap.addEventListener("keydown", function(e){
-      if(e.key === "Enter" || e.key === " " || e.key === "Spacebar"){
-        e.preventDefault();
-        flipCard();
-      }
-    });
-    flashStage.appendChild(wrap);
-
-    var hint = document.createElement("div");
-    hint.className = "flash-hint";
-    hint.textContent = "Tap the card (or press Enter) to reveal the answer";
-    flashStage.appendChild(hint);
-
-    var rateRow = document.createElement("div");
-    rateRow.className = "rate-row";
-    rateRow.style.visibility = isFlipped ? "visible" : "hidden";
-    rateRow.innerHTML =
-      '<button class="btn rate-again" data-rate="again">Again</button>' +
-      '<button class="btn rate-good" data-rate="good">Good</button>' +
-      '<button class="btn rate-easy" data-rate="easy">Easy</button>';
-    rateRow.addEventListener("click", function(e){
-      var btn = e.target.closest("button[data-rate]");
-      if(!btn) return;
-      rateCurrentCard(btn.getAttribute("data-rate"));
-    });
-    flashStage.appendChild(rateRow);
-  }
-
-  function rateCurrentCard(rating){
-    if(!currentCard) return;
-    if(rating === "again"){ currentCard.box = 0; }
-    else if(rating === "good"){ currentCard.box = Math.min(currentCard.box+1, BOX_INTERVALS.length-1); }
-    else if(rating === "easy"){ currentCard.box = Math.min(currentCard.box+2, BOX_INTERVALS.length-1); }
-    currentCard.due = addDays(todayStr(), BOX_INTERVALS[currentCard.box]);
-    persistDecks();
-    studyQueue.shift();
-    duePill.textContent = studyQueue.length + " due";
-    renderCardList();
-    nextCard();
-  }
-
-  function escapeHtml(s){
-    var div = document.createElement("div");
-    div.textContent = s;
-    return div.innerHTML;
-  }
-
-  function renderCardList(){
-    var deck = currentDeck();
-    cardListEl.innerHTML = "";
-    if(!deck || deck.cards.length === 0){
-      var li = document.createElement("li");
-      li.textContent = "No cards in this deck yet.";
-      li.style.color = "var(--muted)";
-      cardListEl.appendChild(li);
-      return;
-    }
-    deck.cards.forEach(function(c){
-      var li = document.createElement("li");
-      var cf = document.createElement("span");
-      cf.className = "cf";
-      cf.textContent = c.front;
-      var box = document.createElement("span");
-      box.className = "box";
-      box.textContent = "box " + c.box + " · due " + c.due;
-      var del = document.createElement("button");
-      del.className = "del";
-      del.type = "button";
-      del.setAttribute("aria-label", "Delete card");
-      del.textContent = "✕";
-      del.addEventListener("click", function(){
-        deck.cards = deck.cards.filter(function(x){ return x.id !== c.id; });
-        persistDecks();
-        renderDeckSelect();
-        buildQueue();
-        nextCard();
-        renderCardList();
-      });
-      li.appendChild(cf);
-      li.appendChild(box);
-      li.appendChild(del);
-      cardListEl.appendChild(li);
-    });
-  }
-
-  deckSelect.addEventListener("change", function(){
-    selectedDeckId = deckSelect.value;
-    saveJSON("sd_selected_deck", selectedDeckId);
-    buildQueue();
-    nextCard();
-    renderCardList();
-    renderDeckSelect();
-  });
-
-  manageToggle.addEventListener("click", function(){
-    var willShow = managePanel.hidden;
-    managePanel.hidden = !willShow;
-    manageToggle.textContent = willShow ? "Hide card manager" : "Manage cards in this deck";
-  });
-
-  addCardForm.addEventListener("submit", function(e){
-    e.preventDefault();
-    var front = cardFrontInput.value.trim();
-    var back = cardBackInput.value.trim();
-    if(!front || !back) return;
-    var deck = currentDeck();
-    if(!deck) return;
-    deck.cards.push({id:uid(), front:front, back:back, box:0, due:todayStr()});
-    persistDecks();
-    cardFrontInput.value = "";
-    cardBackInput.value = "";
-    renderDeckSelect();
-    buildQueue();
-    nextCard();
-    renderCardList();
-  });
-
-  renderDeckSelect();
-  buildQueue();
-  nextCard();
-  renderCardList();
 
   // ================= TIMER =================
   var DEFAULT_MODES = {
@@ -1045,6 +938,8 @@
         timerState.sessionsCompleted += 1;
         saveJSON("sd_timer", timerState);
         renderSessionCount();
+        bumpSessionHistory(todayStr());
+        renderWeeklySummary();
       }
       notifyTimerDone(currentMode);
       remaining = 0;
@@ -1103,6 +998,27 @@
   refreshModeBtnLabels();
   setMode("work");
   renderSessionCount();
+
+  // ================= BREAK REMINDERS =================
+  var BREAK_INTERVAL_MIN = 50;
+  var breakReminderToggle = document.getElementById("breakReminderToggle");
+  var breakReminderEnabled = loadJSON("sd_break_reminder", true);
+  breakReminderToggle.checked = breakReminderEnabled;
+  breakReminderToggle.addEventListener("change", function(){
+    breakReminderEnabled = breakReminderToggle.checked;
+    saveJSON("sd_break_reminder", breakReminderEnabled);
+    announce(breakReminderEnabled ? "Break reminders turned on." : "Break reminders turned off.");
+  });
+  setInterval(function(){
+    if(!breakReminderEnabled) return;
+    playChime();
+    announce("Break reminder: stand up and stretch for a few minutes.");
+    try{
+      if("Notification" in window && Notification.permission === "granted"){
+        new Notification("Break reminder", {body: "You've been at it a while — take a short break."});
+      }
+    }catch(e){}
+  }, BREAK_INTERVAL_MIN * 60 * 1000);
 
   // ================= STUDY STREAK (local to this browser) =================
   var streakNum = document.getElementById("streakNum");
@@ -1234,7 +1150,7 @@
   var exportBtn = document.getElementById("exportBtn");
   var importBtn = document.getElementById("importBtn");
   var importFile = document.getElementById("importFile");
-  var BACKUP_KEYS = ["sd_decks","sd_tasks","sd_selected_deck","sd_durations","sd_timer","sd_local_streak","sd_exam_custom","sd_exam_level","sd_theme","sd_exam_scores"];
+  var BACKUP_KEYS = ["sd_tasks","sd_durations","sd_timer","sd_local_streak","sd_exam_custom","sd_exam_level","sd_theme","sd_exam_scores","sd_work_log","sd_session_history","sd_break_reminder"];
 
   exportBtn.addEventListener("click", function(){
     var backup = {};
