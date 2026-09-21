@@ -189,6 +189,16 @@
   .task-item .del:hover{ color:var(--danger); }
   .task-empty{ color:var(--muted); font-size:0.88rem; padding:8px 6px; }
 
+  /* --- exam scores --- */
+  .score-item{ display:flex; align-items:center; gap:10px; padding:9px 6px; border-radius:8px; }
+  .score-item:hover{ background:var(--surface2); }
+  .score-item .subj{ flex:1; min-width:0; overflow-wrap:anywhere; }
+  .score-item .bar-wrap{ width:80px; height:6px; border-radius:100px; background:var(--surface2); overflow:hidden; flex-shrink:0; }
+  .score-item .bar-fill{ display:block; height:100%; border-radius:100px; }
+  .score-item input[type="number"]{ width:56px; flex:none; text-align:center; padding:5px 4px; font-family:"IBM Plex Mono",monospace; flex-shrink:0; }
+  .score-item .del{ background:none; border:none; color:var(--muted); cursor:pointer; font-size:1rem; padding:2px 6px; line-height:1; border-radius:6px; flex-shrink:0; }
+  .score-item .del:hover{ color:var(--danger); }
+
   /* --- flashcards --- */
   .deck-row{ display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
   .deck-row select{ flex:1; min-width:140px; }
@@ -416,6 +426,21 @@
           <ul class="card-list" id="cardList"></ul>
         </div>
       </div>
+
+      <div class="card">
+        <h2>Exam scores</h2>
+        <div class="sub">Add a subject, then edit its score whenever you get results back.</div>
+        <div class="streak-hero" style="padding-block:0 10px;">
+          <span class="streak-num" id="scoreAvg">–</span>
+          <span class="streak-label">average %</span>
+        </div>
+        <form class="task-form" id="scoreForm">
+          <input type="text" id="scoreSubject" placeholder="Subject, e.g. Chemistry" aria-label="Subject name">
+          <input type="number" id="scoreValue" min="0" max="100" placeholder="%" style="width:64px; flex:none;" aria-label="Score percent">
+          <button class="btn btn-primary btn-sm" type="submit">Add</button>
+        </form>
+        <ul class="task-list" id="scoreList"></ul>
+      </div>
     </div>
   </div>
 
@@ -555,6 +580,120 @@
   });
 
   renderTasks();
+
+  // ================= EXAM SCORES =================
+  function sampleScores(){
+    return [
+      {id:uid(), subject:"Mathematics (example)", score:78},
+      {id:uid(), subject:"English (example)", score:65},
+      {id:uid(), subject:"Science (example)", score:82}
+    ];
+  }
+  var examScores = loadJSON("sd_exam_scores", null);
+  if(!examScores){ examScores = sampleScores(); saveJSON("sd_exam_scores", examScores); }
+  function persistScores(){ saveJSON("sd_exam_scores", examScores); }
+
+  var scoreForm = document.getElementById("scoreForm");
+  var scoreSubject = document.getElementById("scoreSubject");
+  var scoreValue = document.getElementById("scoreValue");
+  var scoreList = document.getElementById("scoreList");
+  var scoreAvg = document.getElementById("scoreAvg");
+
+  function clampScore(v){
+    v = Math.round(Number(v));
+    if(isNaN(v)) v = 0;
+    if(v < 0) v = 0;
+    if(v > 100) v = 100;
+    return v;
+  }
+
+  function scoreColor(pct){
+    if(pct >= 75) return "var(--accent2)";
+    if(pct >= 50) return "var(--accent)";
+    return "var(--danger)";
+  }
+
+  function renderScoreAvg(){
+    if(examScores.length === 0){
+      scoreAvg.textContent = "–";
+      return;
+    }
+    var sum = examScores.reduce(function(acc, s){ return acc + s.score; }, 0);
+    scoreAvg.textContent = Math.round(sum / examScores.length) + "%";
+  }
+
+  function renderScores(){
+    scoreList.innerHTML = "";
+    if(examScores.length === 0){
+      var empty = document.createElement("li");
+      empty.className = "task-empty";
+      empty.textContent = "No subjects yet — add one above to start tracking.";
+      scoreList.appendChild(empty);
+      renderScoreAvg();
+      return;
+    }
+    examScores.forEach(function(s){
+      var li = document.createElement("li");
+      li.className = "score-item";
+
+      var subj = document.createElement("span");
+      subj.className = "subj";
+      subj.textContent = s.subject;
+
+      var barWrap = document.createElement("span");
+      barWrap.className = "bar-wrap";
+      var barFill = document.createElement("span");
+      barFill.className = "bar-fill";
+      barFill.style.width = s.score + "%";
+      barFill.style.background = scoreColor(s.score);
+      barWrap.appendChild(barFill);
+
+      var input = document.createElement("input");
+      input.type = "number";
+      input.min = "0";
+      input.max = "100";
+      input.value = s.score;
+      input.setAttribute("aria-label", "Score for " + s.subject);
+      input.addEventListener("change", function(){
+        s.score = clampScore(input.value);
+        input.value = s.score;
+        persistScores();
+        renderScores();
+      });
+
+      var del = document.createElement("button");
+      del.className = "del";
+      del.type = "button";
+      del.setAttribute("aria-label", "Delete " + s.subject);
+      del.textContent = "✕";
+      del.addEventListener("click", function(){
+        examScores = examScores.filter(function(x){ return x.id !== s.id; });
+        persistScores();
+        renderScores();
+      });
+
+      li.appendChild(subj);
+      li.appendChild(barWrap);
+      li.appendChild(input);
+      li.appendChild(del);
+      scoreList.appendChild(li);
+    });
+    renderScoreAvg();
+  }
+
+  scoreForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    var subject = scoreSubject.value.trim();
+    if(!subject) return;
+    var val = clampScore(scoreValue.value);
+    examScores.push({id: uid(), subject: subject, score: val});
+    persistScores();
+    scoreSubject.value = "";
+    scoreValue.value = "";
+    renderScores();
+  });
+
+  renderScores();
 
   // ================= FLASHCARDS =================
   var deckSelect = document.getElementById("deckSelect");
@@ -1095,7 +1234,7 @@
   var exportBtn = document.getElementById("exportBtn");
   var importBtn = document.getElementById("importBtn");
   var importFile = document.getElementById("importFile");
-  var BACKUP_KEYS = ["sd_decks","sd_tasks","sd_selected_deck","sd_durations","sd_timer","sd_local_streak","sd_exam_custom","sd_exam_level","sd_theme"];
+  var BACKUP_KEYS = ["sd_decks","sd_tasks","sd_selected_deck","sd_durations","sd_timer","sd_local_streak","sd_exam_custom","sd_exam_level","sd_theme","sd_exam_scores"];
 
   exportBtn.addEventListener("click", function(){
     var backup = {};
