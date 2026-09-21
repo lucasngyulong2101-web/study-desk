@@ -1,5 +1,14 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Study Desk</title>
+<meta name="description" content="Focus timer, spaced-repetition flashcards, tasks and exam countdown for study sessions.">
+<meta name="theme-color" content="#B4791C">
+<meta property="og:title" content="Study Desk">
+<meta property="og:description" content="Focus timer, flashcards, tasks and exam countdown for study sessions.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="icon-512.png">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
@@ -74,7 +83,8 @@
     font-family:"IBM Plex Mono", monospace; font-size:0.85rem; color:var(--accent-ink);
     background:var(--accent); padding:6px 12px; border-radius:100px;
   }
-  :root[data-theme="dark"] .streak, @media (prefers-color-scheme: dark){ .streak{ color:var(--bg); } }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .streak{ color:var(--bg); } }
+  :root[data-theme="dark"] .streak{ color:var(--bg); }
 
   /* --- quick links --- */
   .links-row{ display:flex; gap:10px; flex-wrap:wrap; }
@@ -249,7 +259,10 @@
       <h1>Study Desk</h1>
       <div class="byline" id="todayLine">—</div>
     </div>
-    <div class="streak" id="streakPill">🔥 0 sessions today</div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <button class="btn btn-ghost btn-sm" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+      <div class="streak" id="streakPill">🔥 0 sessions today</div>
+    </div>
   </div>
 
   <nav class="links-row" aria-label="Class platforms">
@@ -405,7 +418,15 @@
     </div>
   </div>
 
-  <footer>Your decks, tasks, streak and timer settings are saved in this browser only.</footer>
+  <footer>
+    Your decks, tasks, streak and timer settings are saved in this browser only.
+    <div style="margin-top:10px; display:flex; gap:10px; justify-content:center;">
+      <button class="manage-toggle" id="exportBtn" type="button">Export backup</button>
+      <span aria-hidden="true">·</span>
+      <button class="manage-toggle" id="importBtn" type="button">Import backup</button>
+      <input type="file" id="importFile" accept="application/json" hidden>
+    </div>
+  </footer>
 </div>
 
 <script>
@@ -824,6 +845,37 @@
     }
   }
 
+  function playChime(){
+    try{
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      var ctx = new Ctx();
+      [880, 1320].forEach(function(freq, i){
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        var start = ctx.currentTime + i * 0.15;
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(0.2, start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.35);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + 0.4);
+      });
+    }catch(e){}
+  }
+
+  function notifyTimerDone(finishedMode){
+    playChime();
+    var title = finishedMode === "work" ? "Focus session done" : "Break's over";
+    var body = finishedMode === "work" ? "Nice work — take a break." : "Time to get back to it.";
+    try{
+      if("Notification" in window && Notification.permission === "granted"){
+        new Notification(title, {body: body});
+      }
+    }catch(e){}
+  }
+
   function tick(){
     remaining -= 1;
     if(remaining <= 0){
@@ -835,6 +887,7 @@
         saveJSON("sd_timer", timerState);
         renderSessionCount();
       }
+      notifyTimerDone(currentMode);
       remaining = 0;
       updateDisplay();
       return;
@@ -848,6 +901,9 @@
       clearInterval(tickHandle);
       startPauseBtn.textContent = "Start";
     } else {
+      if("Notification" in window && Notification.permission === "default"){
+        Notification.requestPermission();
+      }
       if(remaining <= 0) remaining = totalSeconds;
       running = true;
       startPauseBtn.textContent = "Pause";
@@ -973,6 +1029,77 @@
     renderExamCountdown();
   });
   renderExamCountdown();
+
+  // ================= THEME TOGGLE =================
+  var themeToggle = document.getElementById("themeToggle");
+  var root = document.documentElement;
+
+  function applyTheme(theme){
+    if(theme === "dark" || theme === "light"){
+      root.setAttribute("data-theme", theme);
+    } else {
+      root.removeAttribute("data-theme");
+    }
+    var prefersDark = theme === "dark" || (theme !== "light" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    themeToggle.textContent = prefersDark ? "☀️" : "🌙";
+  }
+
+  var savedTheme = loadJSON("sd_theme", "auto");
+  applyTheme(savedTheme);
+
+  themeToggle.addEventListener("click", function(){
+    var current = loadJSON("sd_theme", "auto");
+    var isDarkNow = current === "dark" || (current === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    var next = isDarkNow ? "light" : "dark";
+    saveJSON("sd_theme", next);
+    applyTheme(next);
+  });
+
+  // ================= BACKUP EXPORT / IMPORT =================
+  var exportBtn = document.getElementById("exportBtn");
+  var importBtn = document.getElementById("importBtn");
+  var importFile = document.getElementById("importFile");
+  var BACKUP_KEYS = ["sd_decks","sd_tasks","sd_selected_deck","sd_durations","sd_timer","sd_local_streak","sd_exam_custom","sd_exam_level","sd_theme"];
+
+  exportBtn.addEventListener("click", function(){
+    var backup = {};
+    BACKUP_KEYS.forEach(function(k){
+      var raw = localStorage.getItem(k);
+      if(raw !== null) backup[k] = raw;
+    });
+    var blob = new Blob([JSON.stringify(backup, null, 2)], {type:"application/json"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "study-desk-backup-" + todayStr() + ".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  importBtn.addEventListener("click", function(){ importFile.click(); });
+
+  importFile.addEventListener("change", function(){
+    var file = importFile.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      try{
+        var data = JSON.parse(String(reader.result));
+        BACKUP_KEYS.forEach(function(k){
+          if(Object.prototype.hasOwnProperty.call(data, k)){
+            localStorage.setItem(k, data[k]);
+          }
+        });
+        window.location.reload();
+      }catch(e){
+        alert("Could not read that backup file.");
+      }
+    };
+    reader.readAsText(file);
+    importFile.value = "";
+  });
 
 })();
 </script>
