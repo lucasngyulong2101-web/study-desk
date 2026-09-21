@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Study Desk</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --bg:#F1ECE1;
+    --surface:#FFFFFF;
+    --surface2:#E8E1D0;
+    --ink:#221F1A;
+    --muted:#6B6459;
+    --border:#DBD3C0;
+    --accent:#B4791C;
+    --accent-ink:#3A2A08;
+    --accent2:#2F7A73;
+    --accent2-ink:#0D2D2A;
+    --danger:#B4472E;
+    --shadow: 0 1px 2px rgba(34,31,26,0.06), 0 8px 24px -12px rgba(34,31,26,0.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#14181C;
+      --surface:#1C2229;
+      --surface2:#242B33;
+      --ink:#EDEAE3;
+      --muted:#98A0AC;
+      --border:#333B45;
+      --accent:#F2A93C;
+      --accent-ink:#3A2A08;
+      --accent2:#4FB0A5;
+      --accent2-ink:#0D2D2A;
+      --danger:#E2725B;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.6);
+    }
+  }
+
+  *{box-sizing:border-box;}
+  html,body{ margin:0; }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Source Sans 3", system-ui, -apple-system, sans-serif;
+    padding-inline:20px;
+    padding-block:28px 48px;
+    display:flex;
+    justify-content:center;
+  }
+  img{ max-width:100%; }
+  .page{ width:100%; max-width:1080px; display:flex; flex-direction:column; gap:24px; }
+
+  h1,h2,h3{ font-family:"Fraunces", Georgia, serif; font-weight:600; text-wrap:balance; margin:0; }
+
+  /* header */
+  .hero{
+    display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    border-bottom:1px solid var(--border); padding-bottom:18px;
+  }
+  .hero h1{ font-size:2rem; letter-spacing:-0.01em; }
+  .hero .byline{ color:var(--muted); font-size:0.92rem; }
+  .streak-pill{
+    display:flex; align-items:center; gap:8px;
+    font-family:"IBM Plex Mono", monospace; font-size:0.85rem; color:var(--accent-ink);
+    background:var(--accent); padding:6px 12px; border-radius:100px;
+  }
+  @media (prefers-color-scheme: dark){ .streak-pill{ color:var(--bg); } }
+
+  /* --- quick links --- */
+  .links-row{ display:flex; gap:10px; flex-wrap:wrap; }
+  .link-chip{
+    display:flex; align-items:center; gap:9px;
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:10px 16px; text-decoration:none; color:var(--ink); box-shadow:var(--shadow);
+    font-weight:600; font-size:0.9rem; flex:1; min-width:180px;
+  }
+  .link-chip:hover{ border-color:var(--accent2); }
+  .link-chip .ic{
+    width:28px; height:28px; border-radius:8px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .link-chip .ic svg{ width:16px; height:16px; }
+  .link-chip .meta{ display:flex; flex-direction:column; gap:1px; min-width:0; }
+  .link-chip .meta .sub2{ font-weight:400; font-size:0.74rem; color:var(--muted); }
+
+  .grid{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.3fr); gap:20px; align-items:start; }
+  @media (max-width:760px){ .grid{ grid-template-columns:1fr; } }
+  .col{ display:flex; flex-direction:column; gap:20px; min-width:0; }
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:20px; box-shadow:var(--shadow);
+  }
+  .card > h2{ font-size:1.15rem; margin-bottom:4px; }
+  .card .sub{ color:var(--muted); font-size:0.85rem; margin-bottom:16px; }
+
+  /* --- timer --- */
+  .timer-modes{ display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+  .mode-btn{
+    font-family:"Source Sans 3", sans-serif; font-size:0.82rem; font-weight:600;
+    padding:6px 12px; border-radius:100px; border:1px solid var(--border);
+    background:var(--surface2); color:var(--muted); cursor:pointer;
+  }
+  .mode-btn[aria-pressed="true"]{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .duration-row{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px; }
+  .duration-field{ display:flex; align-items:center; gap:6px; }
+  .duration-field label{ font-size:0.76rem; color:var(--muted); }
+  .duration-field input{ width:52px; text-align:center; padding:5px 4px; font-family:"IBM Plex Mono",monospace; }
+  .mode-btn:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible{
+    outline:2px solid var(--accent2); outline-offset:2px;
+  }
+
+  .clock-wrap{ display:flex; flex-direction:column; align-items:center; gap:18px; padding-block:8px 4px; }
+  .clock{ position:relative; width:196px; height:196px; }
+  .clock svg{ width:100%; height:100%; transform:rotate(-90deg); }
+  .clock .track{ fill:none; stroke:var(--surface2); stroke-width:10; }
+  .clock .progress{ fill:none; stroke:var(--accent); stroke-width:10; stroke-linecap:round; transition:stroke-dashoffset 0.3s linear; }
+  .clock .time{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:"IBM Plex Mono", monospace; font-size:2.4rem; font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
+  .clock .label{
+    position:absolute; left:0; right:0; bottom:34%; text-align:center;
+    font-size:0.72rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted);
+  }
+  .timer-controls{ display:flex; gap:10px; }
+  .btn{
+    font-family:"Source Sans 3", sans-serif; font-weight:600; font-size:0.92rem;
+    border-radius:10px; border:1px solid transparent; padding:10px 18px; cursor:pointer;
+  }
+  .btn-primary{ background:var(--accent); color:var(--accent-ink); }
+  .btn-ghost{ background:var(--surface2); color:var(--ink); border-color:var(--border); }
+  .btn-sm{ padding:6px 12px; font-size:0.82rem; border-radius:8px; }
+  .session-count{ color:var(--muted); font-size:0.85rem; text-align:center; }
+  .session-dots{ display:flex; gap:5px; justify-content:center; margin-top:6px; }
+  .session-dots span{ width:7px; height:7px; border-radius:50%; background:var(--surface2); border:1px solid var(--border); }
+  .session-dots span.filled{ background:var(--accent2); border-color:var(--accent2); }
+
+  /* --- streak & leaderboard --- */
+  .streak-hero{ display:flex; align-items:baseline; gap:8px; justify-content:center; padding-block:6px 4px; }
+  .streak-num{ font-family:"Fraunces", serif; font-size:2.6rem; font-weight:600; line-height:1; }
+  .streak-label{ color:var(--muted); font-size:0.85rem; }
+  .streak-note{ text-align:center; color:var(--muted); font-size:0.78rem; }
+  .signin-row{ display:flex; justify-content:center; margin-block:10px 14px; }
+  .leaderboard{ display:flex; flex-direction:column; gap:2px; border-top:1px solid var(--border); padding-top:12px; }
+  .lb-title{ font-size:0.74rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:8px; }
+  .lb-row{ display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:8px; }
+  .lb-row.me{ background:var(--surface2); }
+  .lb-rank{ width:18px; text-align:center; font-family:"IBM Plex Mono",monospace; font-size:0.78rem; color:var(--muted); flex-shrink:0; }
+  .lb-avatar{ width:24px; height:24px; border-radius:50%; flex-shrink:0; object-fit:cover; background:var(--surface2); }
+  .lb-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.88rem; }
+  .lb-count{ font-family:"IBM Plex Mono",monospace; font-size:0.8rem; color:var(--accent-ink); background:var(--accent); padding:2px 9px; border-radius:100px; flex-shrink:0; }
+  @media (prefers-color-scheme: dark){ .lb-count{ color:var(--bg); } }
+  .lb-empty{ color:var(--muted); font-size:0.85rem; padding:4px; }
+
+  /* --- tasks --- */
+  .task-form{ display:flex; gap:8px; margin-bottom:14px; }
+  .task-form input[type="text"]{ flex:1; min-width:0; }
+  input[type="text"], select{
+    background:var(--surface2); border:1px solid var(--border); color:var(--ink);
+    border-radius:8px; padding:9px 11px; font-size:0.92rem; font-family:inherit;
+  }
+  .task-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; }
+  .task-item{
+    display:flex; align-items:center; gap:10px; padding:9px 6px; border-radius:8px;
+  }
+  .task-item:hover{ background:var(--surface2); }
+  .task-item input[type="checkbox"]{ width:18px; height:18px; accent-color:var(--accent2); flex-shrink:0; }
+  .task-item .txt{ flex:1; min-width:0; overflow-wrap:anywhere; }
+  .task-item.done .txt{ color:var(--muted); text-decoration:line-through; }
+  .task-item .del{
+    background:none; border:none; color:var(--muted); cursor:pointer; font-size:1rem;
+    padding:2px 6px; line-height:1; border-radius:6px; flex-shrink:0;
+  }
+  .task-item .del:hover{ color:var(--danger); }
+  .task-empty{ color:var(--muted); font-size:0.88rem; padding:8px 6px; }
+
+  /* --- flashcards --- */
+  .deck-row{ display:flex; gap:10px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
+  .deck-row select{ flex:1; min-width:140px; }
+  .due-pill{
+    font-family:"IBM Plex Mono", monospace; font-size:0.78rem; color:var(--accent2-ink);
+    background:var(--accent2); padding:4px 10px; border-radius:100px; white-space:nowrap;
+  }
+  .flash-stage{ display:flex; flex-direction:column; align-items:center; gap:16px; }
+  .flashcard{
+    width:100%; max-width:420px; aspect-ratio:16/10; perspective:1200px; cursor:pointer;
+  }
+  .flashcard-inner{
+    position:relative; width:100%; height:100%; transform-style:preserve-3d;
+    transition:transform 0.45s cubic-bezier(.4,.2,.2,1);
+  }
+  .flashcard.flipped .flashcard-inner{ transform:rotateY(180deg); }
+  .face{
+    position:absolute; inset:0; backface-visibility:hidden; border-radius:12px;
+    border:1px solid var(--border); background:var(--surface2);
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    padding:22px; font-family:"Fraunces", serif; font-size:1.3rem; font-weight:500;
+    box-shadow:var(--shadow);
+  }
+  .face.back{ transform:rotateY(180deg); background:var(--accent2); color:var(--accent2-ink); }
+  .flash-hint{ color:var(--muted); font-size:0.8rem; }
+  .rate-row{ display:flex; gap:8px; width:100%; max-width:420px; }
+  .rate-row button{ flex:1; }
+  .rate-again{ background:var(--danger); color:#fff; }
+  .rate-good{ background:var(--surface2); color:var(--ink); border:1px solid var(--border); }
+  .rate-easy{ background:var(--accent2); color:var(--accent2-ink); }
+  .done-state{ text-align:center; padding:32px 10px; color:var(--muted); display:flex; flex-direction:column; gap:6px; align-items:center; }
+  .done-state .big{ font-family:"Fraunces", serif; font-size:1.2rem; color:var(--ink); }
+
+  .manage-toggle{ background:none; border:none; color:var(--accent2-ink); font-size:0.82rem; font-weight:600; cursor:pointer; padding:0; margin-top:14px; text-decoration:underline; text-underline-offset:3px; }
+  @media (prefers-color-scheme: dark){ .manage-toggle{ color:var(--accent2); } }
+  .manage-panel{ margin-top:14px; border-top:1px solid var(--border); padding-top:14px; display:flex; flex-direction:column; gap:12px; }
+  .add-card-form{ display:flex; flex-direction:column; gap:8px; }
+  .add-card-form .row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .add-card-form input[type="text"]{ flex:1; min-width:120px; }
+  .card-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; max-height:220px; overflow-y:auto; }
+  .card-list li{
+    display:flex; gap:10px; align-items:center; font-size:0.85rem; padding:7px 8px;
+    background:var(--surface2); border-radius:8px;
+  }
+  .card-list li .cf{ flex:1; min-width:0; overflow-wrap:anywhere; }
+  .card-list li .box{ color:var(--muted); font-family:"IBM Plex Mono",monospace; font-size:0.72rem; white-space:nowrap; }
+  .card-list li .del{ background:none; border:none; color:var(--muted); cursor:pointer; font-size:0.95rem; }
+  .card-list li .del:hover{ color:var(--danger); }
+
+  footer{ text-align:center; color:var(--muted); font-size:0.78rem; padding-top:6px; }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="hero">
+    <div>
+      <h1>Study Desk</h1>
+      <div class="byline" id="todayLine">—</div>
+    </div>
+    <div class="streak-pill" id="streakPill">🔥 0 sessions today</div>
+  </div>
+
+  <nav class="links-row" aria-label="Class platforms">
+    <a class="link-chip" href="https://chat.google.com" target="_blank" rel="noopener noreferrer">
+      <span class="ic" style="background:#00897B">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 4h16v11H8l-4 4V4z" fill="#fff"/></svg>
+      </span>
+      <span class="meta">Google Chat<span class="sub2">Message classmates & teachers</span></span>
+    </a>
+    <a class="link-chip" href="https://classroom.google.com" target="_blank" rel="noopener noreferrer">
+      <span class="ic" style="background:#1B7A43">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v3H4V5zm0 5h10v9H4v-9zm12 0h4v9h-4v-9z" fill="#fff"/></svg>
+      </span>
+      <span class="meta">Google Classroom<span class="sub2">Assignments & announcements</span></span>
+    </a>
+    <a class="link-chip" href="https://vle.learning.moe.edu.sg" target="_blank" rel="noopener noreferrer">
+      <span class="ic" style="background:#B4791C">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l9 4.5-9 4.5-9-4.5L12 3z" fill="#fff"/><path d="M6 10.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5" stroke="#fff" stroke-width="1.6" fill="none"/></svg>
+      </span>
+      <span class="meta">Student Learning Space<span class="sub2">MOE SLS lessons & resources</span></span>
+    </a>
+    <a class="link-chip" href="https://open.spotify.com/search/lofi%20study%20focus" target="_blank" rel="noopener noreferrer">
+      <span class="ic" style="background:#1DB954">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 9.5c3.2-1 8-.7 10.6.9M6.2 12.7c2.8-.8 6.8-.6 9.2.8M6 15.7c2.3-.6 5.4-.5 7.4.7" stroke="#fff" stroke-width="1.7" stroke-linecap="round" fill="none"/></svg>
+      </span>
+      <span class="meta">Spotify<span class="sub2">Study & focus playlists</span></span>
+    </a>
+  </nav>
+
+  <div class="grid">
+    <div class="col">
+      <div class="card">
+        <h2>Study streak</h2>
+        <div class="sub">Open Study Desk once a day to keep it alive.</div>
+        <div class="streak-hero">
+          <span class="streak-num" id="streakNum">–</span>
+          <span class="streak-label" id="streakLabel">day streak</span>
+        </div>
+        <div class="signin-row">
+          <button class="btn btn-ghost btn-sm" id="signInBtn" type="button">Sign in with Google</button>
+        </div>
+        <div class="streak-note" id="streakNote">Loading…</div>
+        <div class="leaderboard" id="leaderboard" style="margin-top:14px;">
+          <div class="lb-title">Leaderboard</div>
+          <div class="lb-empty" id="lbEmpty">Loading…</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Focus timer</h2>
+        <div class="sub">Work in short bursts, then rest on purpose.</div>
+        <div class="timer-modes" role="group" aria-label="Timer mode">
+          <button class="mode-btn" data-mode="work" aria-pressed="true">Focus · 25m</button>
+          <button class="mode-btn" data-mode="short" aria-pressed="false">Short break · 5m</button>
+          <button class="mode-btn" data-mode="long" aria-pressed="false">Long break · 15m</button>
+        </div>
+        <div class="duration-row">
+          <div class="duration-field">
+            <label for="durWork">Focus (min)</label>
+            <input type="number" id="durWork" min="1" max="180" value="25">
+          </div>
+          <div class="duration-field">
+            <label for="durShort">Short (min)</label>
+            <input type="number" id="durShort" min="1" max="180" value="5">
+          </div>
+          <div class="duration-field">
+            <label for="durLong">Long (min)</label>
+            <input type="number" id="durLong" min="1" max="180" value="15">
+          </div>
+        </div>
+        <div class="clock-wrap">
+          <div class="clock">
+            <svg viewBox="0 0 100 100">
+              <circle class="track" cx="50" cy="50" r="44"></circle>
+              <circle class="progress" id="progressRing" cx="50" cy="50" r="44" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"></circle>
+            </svg>
+            <div class="label" id="modeLabel">Focus</div>
+            <div class="time" id="timeDisplay">25:00</div>
+          </div>
+          <div class="timer-controls">
+            <button class="btn btn-primary" id="startPauseBtn">Start</button>
+            <button class="btn btn-ghost" id="resetBtn">Reset</button>
+          </div>
+          <div>
+            <div class="session-count"><span id="sessionCountText">0 focus sessions today</span></div>
+            <div class="session-dots" id="sessionDots"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Study tasks</h2>
+        <div class="sub">What today's session needs to cover.</div>
+        <form class="task-form" id="taskForm">
+          <input type="text" id="taskInput" placeholder="Add a task, e.g. Review Ch. 4 notes" aria-label="New task">
+          <button class="btn btn-primary btn-sm" type="submit">Add</button>
+        </form>
+        <ul class="task-list" id="taskList"></ul>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card">
+        <h2>Flashcards</h2>
+        <div class="sub">Rate honestly — it decides when a card comes back.</div>
+        <div class="deck-row">
+          <select id="deckSelect" aria-label="Choose deck"></select>
+          <span class="due-pill" id="duePill">0 due</span>
+        </div>
+
+        <div class="flash-stage" id="flashStage"></div>
+
+        <button class="manage-toggle" id="manageToggle" type="button">Manage cards in this deck</button>
+        <div class="manage-panel" id="managePanel" hidden>
+          <form class="add-card-form" id="addCardForm">
+            <div class="row">
+              <input type="text" id="cardFront" placeholder="Front (question)" aria-label="Card front">
+              <input type="text" id="cardBack" placeholder="Back (answer)" aria-label="Card back">
+              <button class="btn btn-ghost btn-sm" type="submit">Add card</button>
+            </div>
+          </form>
+          <ul class="card-list" id="cardList"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Tasks, decks and timer settings are saved in this browser. Sign in to sync your streak and join the leaderboard.</footer>
+</div>
+
+<!--
+  ============================================================
+  FIREBASE SETUP — fill in firebaseConfig below to turn on the
+  streak leaderboard. See the setup guide for full steps.
+  Without it, the streak still works locally per-browser and
+  the leaderboard shows a "not configured" message.
+  ============================================================
+-->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script>
+  // TODO: replace with your own project's config (Firebase console →
+  // Project settings → General → Your apps → SDK setup and configuration)
+  var firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+</script>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- storage helpers ----------
+  function loadJSON(key, fallback){
+    try{
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    }catch(e){ return fallback; }
+  }
+  function saveJSON(key, val){
+    try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+  }
+  function todayStr(){
+    var d = new Date();
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  }
+  function addDays(dateStr, n){
+    var d = new Date(dateStr+"T00:00:00");
+    d.setDate(d.getDate()+n);
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  }
+  function yesterday(dateStr){ return addDays(dateStr, -1); }
+  function uid(){ return Math.random().toString(36).slice(2,10); }
+
+  document.getElementById("todayLine").textContent = new Date().toLocaleDateString(undefined,{weekday:"long", month:"long", day:"numeric"});
+
+  // ---------- default data ----------
+  var BOX_INTERVALS = [0,1,3,7,14]; // days, index = box level
+  function sampleDecks(){
+    var t = todayStr();
+    return [
+      {
+        id:"deck-bio", name:"Cell Biology (example)",
+        cards:[
+          {id:uid(), front:"What organelle produces most of a cell's ATP?", back:"The mitochondrion", box:0, due:t},
+          {id:uid(), front:"What does the Golgi apparatus do?", back:"Packages and modifies proteins for transport", box:1, due:t},
+          {id:uid(), front:"What is the function of the cell membrane?", back:"Controls what enters and leaves the cell", box:0, due:addDays(t,1)}
+        ]
+      },
+      {
+        id:"deck-es", name:"Spanish Vocabulary (example)",
+        cards:[
+          {id:uid(), front:"la biblioteca", back:"the library", box:2, due:t},
+          {id:uid(), front:"el plazo", back:"the deadline", box:0, due:t},
+          {id:uid(), front:"aprobar", back:"to pass (an exam)", box:1, due:addDays(t,2)}
+        ]
+      }
+    ];
+  }
+  function sampleTasks(){
+    return [
+      {id:uid(), text:"Review Ch. 4 flashcards before class", done:false},
+      {id:uid(), text:"Draft outline for history essay", done:false},
+      {id:uid(), text:"Skim lecture slides from Monday", done:true}
+    ];
+  }
+
+  var decks = loadJSON("sd_decks", null);
+  if(!decks){ decks = sampleDecks(); saveJSON("sd_decks", decks); }
+  var tasks = loadJSON("sd_tasks", null);
+  if(!tasks){ tasks = sampleTasks(); saveJSON("sd_tasks", tasks); }
+  var selectedDeckId = loadJSON("sd_selected_deck", decks[0] ? decks[0].id : null);
+
+  function persistDecks(){ saveJSON("sd_decks", decks); }
+  function persistTasks(){ saveJSON("sd_tasks", tasks); }
+
+  // ================= TASKS =================
+  var taskList = document.getElementById("taskList");
+  var taskForm = document.getElementById("taskForm");
+  var taskInput = document.getElementById("taskInput");
+
+  function renderTasks(){
+    taskList.innerHTML = "";
+    if(tasks.length === 0){
+      var li = document.createElement("li");
+      li.className = "task-empty";
+      li.textContent = "No tasks yet — add what you need to study today.";
+      taskList.appendChild(li);
+      return;
+    }
+    tasks.forEach(function(t){
+      var li = document.createElement("li");
+      li.className = "task-item" + (t.done ? " done" : "");
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = t.done;
+      cb.id = "task-cb-" + t.id;
+      cb.addEventListener("change", function(){
+        t.done = cb.checked;
+        persistTasks();
+        renderTasks();
+      });
+      var label = document.createElement("label");
+      label.className = "txt";
+      label.setAttribute("for", cb.id);
+      label.textContent = t.text;
+      var del = document.createElement("button");
+      del.className = "del";
+      del.type = "button";
+      del.setAttribute("aria-label", "Delete task");
+      del.textContent = "✕";
+      del.addEventListener("click", function(){
+        tasks = tasks.filter(function(x){ return x.id !== t.id; });
+        persistTasks();
+        renderTasks();
+      });
+      li.appendChild(cb);
+      li.appendChild(label);
+      li.appendChild(del);
+      taskList.appendChild(li);
+    });
+  }
+
+  taskForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    var val = taskInput.value.trim();
+    if(!val) return;
+    tasks.push({id:uid(), text:val, done:false});
+    persistTasks();
+    taskInput.value = "";
+    renderTasks();
+  });
+
+  renderTasks();
+
+  // ================= FLASHCARDS =================
+  var deckSelect = document.getElementById("deckSelect");
+  var duePill = document.getElementById("duePill");
+  var flashStage = document.getElementById("flashStage");
+  var manageToggle = document.getElementById("manageToggle");
+  var managePanel = document.getElementById("managePanel");
+  var addCardForm = document.getElementById("addCardForm");
+  var cardFrontInput = document.getElementById("cardFront");
+  var cardBackInput = document.getElementById("cardBack");
+  var cardListEl = document.getElementById("cardList");
+
+  var studyQueue = [];
+  var currentCard = null;
+  var isFlipped = false;
+
+  function currentDeck(){
+    return decks.find(function(d){ return d.id === selectedDeckId; }) || decks[0];
+  }
+
+  function renderDeckSelect(){
+    deckSelect.innerHTML = "";
+    decks.forEach(function(d){
+      var opt = document.createElement("option");
+      opt.value = d.id;
+      opt.textContent = d.name + " (" + d.cards.length + ")";
+      if(d.id === selectedDeckId) opt.selected = true;
+      deckSelect.appendChild(opt);
+    });
+  }
+
+  function buildQueue(){
+    var deck = currentDeck();
+    var t = todayStr();
+    studyQueue = deck ? deck.cards.filter(function(c){ return c.due <= t; }).slice() : [];
+    duePill.textContent = studyQueue.length + " due";
+  }
+
+  function nextCard(){
+    isFlipped = false;
+    currentCard = studyQueue.length ? studyQueue[0] : null;
+    renderFlashStage();
+  }
+
+  function renderFlashStage(){
+    flashStage.innerHTML = "";
+    if(!currentDeck() || currentDeck().cards.length === 0){
+      var empty = document.createElement("div");
+      empty.className = "done-state";
+      empty.innerHTML = '<div class="big">No cards yet</div><div>Add your first card below to start studying this deck.</div>';
+      flashStage.appendChild(empty);
+      return;
+    }
+    if(!currentCard){
+      var done = document.createElement("div");
+      done.className = "done-state";
+      done.innerHTML = '<div class="big">All caught up ✓</div><div>Nothing due in this deck right now. Nice work.</div>';
+      flashStage.appendChild(done);
+      return;
+    }
+    var wrap = document.createElement("div");
+    wrap.className = "flashcard" + (isFlipped ? " flipped" : "");
+    wrap.innerHTML =
+      '<div class="flashcard-inner">' +
+        '<div class="face front">' + escapeHtml(currentCard.front) + '</div>' +
+        '<div class="face back">' + escapeHtml(currentCard.back) + '</div>' +
+      '</div>';
+    wrap.addEventListener("click", function(){
+      isFlipped = !isFlipped;
+      wrap.classList.toggle("flipped", isFlipped);
+      rateRow.style.visibility = isFlipped ? "visible" : "hidden";
+    });
+    flashStage.appendChild(wrap);
+
+    var hint = document.createElement("div");
+    hint.className = "flash-hint";
+    hint.textContent = "Tap the card to reveal the answer";
+    flashStage.appendChild(hint);
+
+    var rateRow = document.createElement("div");
+    rateRow.className = "rate-row";
+    rateRow.style.visibility = isFlipped ? "visible" : "hidden";
+    rateRow.innerHTML =
+      '<button class="btn rate-again" data-rate="again">Again</button>' +
+      '<button class="btn rate-good" data-rate="good">Good</button>' +
+      '<button class="btn rate-easy" data-rate="easy">Easy</button>';
+    rateRow.addEventListener("click", function(e){
+      var btn = e.target.closest("button[data-rate]");
+      if(!btn) return;
+      rateCurrentCard(btn.getAttribute("data-rate"));
+    });
+    flashStage.appendChild(rateRow);
+  }
+
+  function rateCurrentCard(rating){
+    if(!currentCard) return;
+    if(rating === "again"){ currentCard.box = 0; }
+    else if(rating === "good"){ currentCard.box = Math.min(currentCard.box+1, BOX_INTERVALS.length-1); }
+    else if(rating === "easy"){ currentCard.box = Math.min(currentCard.box+2, BOX_INTERVALS.length-1); }
+    currentCard.due = addDays(todayStr(), BOX_INTERVALS[currentCard.box]);
+    persistDecks();
+    studyQueue.shift();
+    duePill.textContent = studyQueue.length + " due";
+    renderCardList();
+    nextCard();
+  }
+
+  function escapeHtml(s){
+    var div = document.createElement("div");
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  function renderCardList(){
+    var deck = currentDeck();
+    cardListEl.innerHTML = "";
+    if(!deck || deck.cards.length === 0){
+      var li = document.createElement("li");
+      li.textContent = "No cards in this deck yet.";
+      li.style.color = "var(--muted)";
+      cardListEl.appendChild(li);
+      return;
+    }
+    deck.cards.forEach(function(c){
+      var li = document.createElement("li");
+      var cf = document.createElement("span");
+      cf.className = "cf";
+      cf.textContent = c.front;
+      var box = document.createElement("span");
+      box.className = "box";
+      box.textContent = "box " + c.box + " · due " + c.due;
+      var del = document.createElement("button");
+      del.className = "del";
+      del.type = "button";
+      del.setAttribute("aria-label", "Delete card");
+      del.textContent = "✕";
+      del.addEventListener("click", function(){
+        deck.cards = deck.cards.filter(function(x){ return x.id !== c.id; });
+        persistDecks();
+        renderDeckSelect();
+        buildQueue();
+        nextCard();
+        renderCardList();
+      });
+      li.appendChild(cf);
+      li.appendChild(box);
+      li.appendChild(del);
+      cardListEl.appendChild(li);
+    });
+  }
+
+  deckSelect.addEventListener("change", function(){
+    selectedDeckId = deckSelect.value;
+    saveJSON("sd_selected_deck", selectedDeckId);
+    buildQueue();
+    nextCard();
+    renderCardList();
+    renderDeckSelect();
+  });
+
+  manageToggle.addEventListener("click", function(){
+    var willShow = managePanel.hidden;
+    managePanel.hidden = !willShow;
+    manageToggle.textContent = willShow ? "Hide card manager" : "Manage cards in this deck";
+  });
+
+  addCardForm.addEventListener("submit", function(e){
+    e.preventDefault();
+    var front = cardFrontInput.value.trim();
+    var back = cardBackInput.value.trim();
+    if(!front || !back) return;
+    var deck = currentDeck();
+    if(!deck) return;
+    deck.cards.push({id:uid(), front:front, back:back, box:0, due:todayStr()});
+    persistDecks();
+    cardFrontInput.value = "";
+    cardBackInput.value = "";
+    renderDeckSelect();
+    buildQueue();
+    nextCard();
+    renderCardList();
+  });
+
+  renderDeckSelect();
+  buildQueue();
+  nextCard();
+  renderCardList();
+
+  // ================= TIMER =================
+  var DEFAULT_MODES = {
+    work:  {label:"Focus",       minutes:25},
+    short: {label:"Short break", minutes:5},
+    long:  {label:"Long break",  minutes:15}
+  };
+  var savedDurations = loadJSON("sd_durations", null);
+  var MODES = {
+    work:  {label:"Focus",       minutes:(savedDurations && savedDurations.work)  || DEFAULT_MODES.work.minutes},
+    short: {label:"Short break", minutes:(savedDurations && savedDurations.short) || DEFAULT_MODES.short.minutes},
+    long:  {label:"Long break",  minutes:(savedDurations && savedDurations.long)  || DEFAULT_MODES.long.minutes}
+  };
+  var modeBtns = Array.prototype.slice.call(document.querySelectorAll(".mode-btn"));
+  var durInputs = { work: document.getElementById("durWork"), short: document.getElementById("durShort"), long: document.getElementById("durLong") };
+  Object.keys(durInputs).forEach(function(key){ durInputs[key].value = MODES[key].minutes; });
+  var timeDisplay = document.getElementById("timeDisplay");
+  var modeLabel = document.getElementById("modeLabel");
+  var progressRing = document.getElementById("progressRing");
+  var startPauseBtn = document.getElementById("startPauseBtn");
+  var resetBtn = document.getElementById("resetBtn");
+  var sessionCountText = document.getElementById("sessionCountText");
+  var sessionDots = document.getElementById("sessionDots");
+  var streakPill = document.getElementById("streakPill");
+
+  var timerState = loadJSON("sd_timer", null);
+  var today = todayStr();
+  if(!timerState || timerState.date !== today){
+    timerState = {date:today, sessionsCompleted:0};
+    saveJSON("sd_timer", timerState);
+  }
+
+  var currentMode = "work";
+  var totalSeconds = MODES.work.minutes * 60;
+  var remaining = totalSeconds;
+  var running = false;
+  var tickHandle = null;
+
+  function formatTime(sec){
+    var m = Math.floor(sec/60);
+    var s = sec % 60;
+    return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+  }
+
+  function updateDisplay(){
+    timeDisplay.textContent = formatTime(remaining);
+    var frac = remaining / totalSeconds;
+    var offset = 100 * (1 - frac);
+    progressRing.style.strokeDashoffset = offset;
+  }
+
+  function modeBtnLabel(key){
+    return MODES[key].label + " · " + MODES[key].minutes + "m";
+  }
+
+  function refreshModeBtnLabels(){
+    modeBtns.forEach(function(b){
+      var key = b.getAttribute("data-mode");
+      b.textContent = modeBtnLabel(key);
+    });
+  }
+
+  function setMode(mode){
+    currentMode = mode;
+    totalSeconds = MODES[mode].minutes * 60;
+    remaining = totalSeconds;
+    running = false;
+    clearInterval(tickHandle);
+    modeLabel.textContent = MODES[mode].label;
+    startPauseBtn.textContent = "Start";
+    modeBtns.forEach(function(b){
+      b.setAttribute("aria-pressed", b.getAttribute("data-mode") === mode ? "true" : "false");
+    });
+    updateDisplay();
+  }
+
+  Object.keys(durInputs).forEach(function(key){
+    durInputs[key].addEventListener("change", function(){
+      var v = Math.round(Number(durInputs[key].value));
+      if(!v || v < 1) v = 1;
+      if(v > 180) v = 180;
+      durInputs[key].value = v;
+      MODES[key].minutes = v;
+      saveJSON("sd_durations", {work:MODES.work.minutes, short:MODES.short.minutes, long:MODES.long.minutes});
+      refreshModeBtnLabels();
+      if(key === currentMode && !running){
+        setMode(currentMode);
+      }
+    });
+  });
+
+  function renderSessionCount(){
+    var n = timerState.sessionsCompleted;
+    sessionCountText.textContent = n + (n === 1 ? " focus session today" : " focus sessions today");
+    streakPill.textContent = "🔥 " + n + " session" + (n === 1 ? "" : "s") + " today";
+    sessionDots.innerHTML = "";
+    var total = Math.max(4, n);
+    for(var i=0;i<total;i++){
+      var dot = document.createElement("span");
+      if(i < n) dot.className = "filled";
+      sessionDots.appendChild(dot);
+    }
+  }
+
+  function tick(){
+    remaining -= 1;
+    if(remaining <= 0){
+      clearInterval(tickHandle);
+      running = false;
+      startPauseBtn.textContent = "Start";
+      if(currentMode === "work"){
+        timerState.sessionsCompleted += 1;
+        saveJSON("sd_timer", timerState);
+        renderSessionCount();
+      }
+      remaining = 0;
+      updateDisplay();
+      return;
+    }
+    updateDisplay();
+  }
+
+  startPauseBtn.addEventListener("click", function(){
+    if(running){
+      running = false;
+      clearInterval(tickHandle);
+      startPauseBtn.textContent = "Start";
+    } else {
+      if(remaining <= 0) remaining = totalSeconds;
+      running = true;
+      startPauseBtn.textContent = "Pause";
+      tickHandle = setInterval(tick, 1000);
+    }
+  });
+
+  resetBtn.addEventListener("click", function(){
+    running = false;
+    clearInterval(tickHandle);
+    remaining = totalSeconds;
+    startPauseBtn.textContent = "Start";
+    updateDisplay();
+  });
+
+  modeBtns.forEach(function(btn){
+    btn.addEventListener("click", function(){
+      setMode(btn.getAttribute("data-mode"));
+    });
+  });
+
+  refreshModeBtnLabels();
+  setMode("work");
+  renderSessionCount();
+
+  // ================= STREAK & LEADERBOARD (Firebase) =================
+  var streakNum = document.getElementById("streakNum");
+  var streakNote = document.getElementById("streakNote");
+  var signInBtn = document.getElementById("signInBtn");
+  var leaderboard = document.getElementById("leaderboard");
+  var lbEmpty = document.getElementById("lbEmpty");
+
+  function localCheckIn(){
+    var local = loadJSON("sd_local_streak", {count:0, lastLogin:null});
+    var t = todayStr();
+    if(local.lastLogin !== t){
+      local.count = (local.lastLogin === yesterday(t)) ? local.count + 1 : 1;
+      local.lastLogin = t;
+      saveJSON("sd_local_streak", local);
+    }
+    return local.count;
+  }
+
+  function clearLeaderboardRows(){
+    leaderboard.querySelectorAll(".lb-row").forEach(function(el){ el.remove(); });
+  }
+
+  function renderLeaderboardRows(rows, myId){
+    clearLeaderboardRows();
+    if(rows.length === 0){
+      lbEmpty.hidden = false;
+      lbEmpty.textContent = "No streaks yet — be the first to check in today.";
+      return;
+    }
+    lbEmpty.hidden = true;
+    rows.forEach(function(r, i){
+      var row = document.createElement("div");
+      row.className = "lb-row" + (r.id === myId ? " me" : "");
+      var img = document.createElement("img");
+      img.className = "lb-avatar";
+      img.src = r.avatarUrl || ("https://api.dicebear.com/7.x/initials/svg?seed=" + encodeURIComponent(r.name || "?"));
+      img.alt = "";
+      var name = document.createElement("span");
+      name.className = "lb-name";
+      name.textContent = (r.name || "Someone") + (r.id === myId ? " (you)" : "");
+      var rank = document.createElement("span");
+      rank.className = "lb-rank";
+      rank.textContent = String(i+1);
+      var count = document.createElement("span");
+      count.className = "lb-count";
+      count.textContent = r.count + "🔥";
+      row.appendChild(rank);
+      row.appendChild(img);
+      row.appendChild(name);
+      row.appendChild(count);
+      leaderboard.appendChild(row);
+    });
+  }
+
+  var firebaseReady = false;
+  try{
+    firebaseReady = !!(window.firebase && firebaseConfig.apiKey !== "YOUR_API_KEY");
+    if(firebaseReady) firebase.initializeApp(firebaseConfig);
+  }catch(e){ firebaseReady = false; }
+
+  if(!firebaseReady){
+    streakNum.textContent = String(localCheckIn());
+    streakNote.textContent = "Add your Firebase config in the HTML to turn on the shared leaderboard.";
+    lbEmpty.textContent = "Leaderboard needs Firebase set up — see the setup guide.";
+    signInBtn.hidden = true;
+  } else {
+    var auth = firebase.auth();
+    var firestoreDb = firebase.firestore();
+    var currentUser = null;
+    var unsubLeaderboard = null;
+
+    function subscribeLeaderboard(myId){
+      if(unsubLeaderboard) unsubLeaderboard();
+      unsubLeaderboard = firestoreDb.collection("streaks").orderBy("count", "desc").limit(15)
+        .onSnapshot(function(qsnap){
+          var rows = [];
+          qsnap.forEach(function(doc){
+            var d = doc.data() || {};
+            rows.push({id:doc.id, count:d.count || 0, name:d.name || "", avatarUrl:d.photoURL || ""});
+          });
+          renderLeaderboardRows(rows, myId);
+        }, function(err){
+          lbEmpty.hidden = false;
+          lbEmpty.textContent = "Leaderboard unavailable right now.";
+        });
+    }
+
+    function checkInAndSync(user){
+      currentUser = user;
+      signInBtn.textContent = "Sign out";
+      streakNote.textContent = "Signed in as " + (user.displayName || user.email || "you");
+      var t = todayStr();
+      var ref = firestoreDb.collection("streaks").doc(user.uid);
+      ref.get().then(function(snap){
+        var data = snap.exists ? snap.data() : null;
+        var count;
+        if(!data) count = 1;
+        else if(data.lastLogin === t) count = data.count;
+        else if(data.lastLogin === yesterday(t)) count = data.count + 1;
+        else count = 1;
+        streakNum.textContent = String(count);
+        if(!data || data.lastLogin !== t){
+          ref.set({
+            count: count,
+            lastLogin: t,
+            name: user.displayName || "",
+            photoURL: user.photoURL || ""
+          }, {merge:true}).catch(function(){});
+        }
+      });
+      subscribeLeaderboard(user.uid);
+    }
+
+    function showSignedOut(){
+      currentUser = null;
+      signInBtn.textContent = "Sign in with Google";
+      streakNum.textContent = String(localCheckIn());
+      streakNote.textContent = "Sign in to sync your streak and join the leaderboard.";
+      lbEmpty.hidden = false;
+      lbEmpty.textContent = "Sign in to see the leaderboard.";
+      if(unsubLeaderboard){ unsubLeaderboard(); unsubLeaderboard = null; }
+      clearLeaderboardRows();
+    }
+
+    signInBtn.addEventListener("click", function(){
+      if(currentUser){
+        auth.signOut();
+      } else {
+        var provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch(function(err){
+          streakNote.textContent = "Sign-in failed: " + err.message;
+        });
+      }
+    });
+
+    auth.onAuthStateChanged(function(user){
+      if(user) checkInAndSync(user);
+      else showSignedOut();
+    });
+  }
+
+})();
+</script>
+</body>
+</html>
