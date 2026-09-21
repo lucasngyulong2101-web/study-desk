@@ -1,8 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Study Desk</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
@@ -22,7 +18,7 @@
     --shadow: 0 1px 2px rgba(34,31,26,0.06), 0 8px 24px -12px rgba(34,31,26,0.18);
   }
   @media (prefers-color-scheme: dark){
-    :root{
+    :root:not([data-theme="light"]){
       --bg:#14181C;
       --surface:#1C2229;
       --surface2:#242B33;
@@ -37,9 +33,22 @@
       --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.6);
     }
   }
+  :root[data-theme="dark"]{
+    --bg:#14181C;
+    --surface:#1C2229;
+    --surface2:#242B33;
+    --ink:#EDEAE3;
+    --muted:#98A0AC;
+    --border:#333B45;
+    --accent:#F2A93C;
+    --accent-ink:#3A2A08;
+    --accent2:#4FB0A5;
+    --accent2-ink:#0D2D2A;
+    --danger:#E2725B;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px -14px rgba(0,0,0,0.6);
+  }
 
   *{box-sizing:border-box;}
-  html,body{ margin:0; }
   body{
     background:var(--bg);
     color:var(--ink);
@@ -49,7 +58,6 @@
     display:flex;
     justify-content:center;
   }
-  img{ max-width:100%; }
   .page{ width:100%; max-width:1080px; display:flex; flex-direction:column; gap:24px; }
 
   h1,h2,h3{ font-family:"Fraunces", Georgia, serif; font-weight:600; text-wrap:balance; margin:0; }
@@ -61,12 +69,12 @@
   }
   .hero h1{ font-size:2rem; letter-spacing:-0.01em; }
   .hero .byline{ color:var(--muted); font-size:0.92rem; }
-  .streak-pill{
+  .streak{
     display:flex; align-items:center; gap:8px;
     font-family:"IBM Plex Mono", monospace; font-size:0.85rem; color:var(--accent-ink);
     background:var(--accent); padding:6px 12px; border-radius:100px;
   }
-  @media (prefers-color-scheme: dark){ .streak-pill{ color:var(--bg); } }
+  :root[data-theme="dark"] .streak, @media (prefers-color-scheme: dark){ .streak{ color:var(--bg); } }
 
   /* --- quick links --- */
   .links-row{ display:flex; gap:10px; flex-wrap:wrap; }
@@ -108,6 +116,7 @@
   .duration-field{ display:flex; align-items:center; gap:6px; }
   .duration-field label{ font-size:0.76rem; color:var(--muted); }
   .duration-field input{ width:52px; text-align:center; padding:5px 4px; font-family:"IBM Plex Mono",monospace; }
+  .duration-field input[type="date"]{ width:132px; color-scheme:light dark; }
   .mode-btn:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible{
     outline:2px solid var(--accent2); outline-offset:2px;
   }
@@ -143,8 +152,7 @@
   .streak-hero{ display:flex; align-items:baseline; gap:8px; justify-content:center; padding-block:6px 4px; }
   .streak-num{ font-family:"Fraunces", serif; font-size:2.6rem; font-weight:600; line-height:1; }
   .streak-label{ color:var(--muted); font-size:0.85rem; }
-  .streak-note{ text-align:center; color:var(--muted); font-size:0.78rem; }
-  .signin-row{ display:flex; justify-content:center; margin-block:10px 14px; }
+  .streak-note{ text-align:center; color:var(--muted); font-size:0.78rem; margin-bottom:14px; }
   .leaderboard{ display:flex; flex-direction:column; gap:2px; border-top:1px solid var(--border); padding-top:12px; }
   .lb-title{ font-size:0.74rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:8px; }
   .lb-row{ display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:8px; }
@@ -153,8 +161,12 @@
   .lb-avatar{ width:24px; height:24px; border-radius:50%; flex-shrink:0; object-fit:cover; background:var(--surface2); }
   .lb-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.88rem; }
   .lb-count{ font-family:"IBM Plex Mono",monospace; font-size:0.8rem; color:var(--accent-ink); background:var(--accent); padding:2px 9px; border-radius:100px; flex-shrink:0; }
-  @media (prefers-color-scheme: dark){ .lb-count{ color:var(--bg); } }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .lb-count{ color:var(--bg); } }
+  :root[data-theme="dark"] .lb-count{ color:var(--bg); }
   .lb-empty{ color:var(--muted); font-size:0.85rem; padding:4px; }
+  .countdown-link{ color:var(--accent2-ink); font-weight:600; text-decoration:underline; text-underline-offset:3px; }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .countdown-link{ color:var(--accent2); } }
+  :root[data-theme="dark"] .countdown-link{ color:var(--accent2); }
 
   /* --- tasks --- */
   .task-form{ display:flex; gap:8px; margin-bottom:14px; }
@@ -212,7 +224,8 @@
   .done-state .big{ font-family:"Fraunces", serif; font-size:1.2rem; color:var(--ink); }
 
   .manage-toggle{ background:none; border:none; color:var(--accent2-ink); font-size:0.82rem; font-weight:600; cursor:pointer; padding:0; margin-top:14px; text-decoration:underline; text-underline-offset:3px; }
-  @media (prefers-color-scheme: dark){ .manage-toggle{ color:var(--accent2); } }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .manage-toggle{ color:var(--accent2); } }
+  :root[data-theme="dark"] .manage-toggle{ color:var(--accent2); }
   .manage-panel{ margin-top:14px; border-top:1px solid var(--border); padding-top:14px; display:flex; flex-direction:column; gap:12px; }
   .add-card-form{ display:flex; flex-direction:column; gap:8px; }
   .add-card-form .row{ display:flex; gap:8px; flex-wrap:wrap; }
@@ -229,8 +242,6 @@
 
   footer{ text-align:center; color:var(--muted); font-size:0.78rem; padding-top:6px; }
 </style>
-</head>
-<body>
 
 <div class="page">
   <div class="hero">
@@ -238,7 +249,7 @@
       <h1>Study Desk</h1>
       <div class="byline" id="todayLine">—</div>
     </div>
-    <div class="streak-pill" id="streakPill">🔥 0 sessions today</div>
+    <div class="streak" id="streakPill">🔥 0 sessions today</div>
   </div>
 
   <nav class="links-row" aria-label="Class platforms">
@@ -260,9 +271,15 @@
       </span>
       <span class="meta">Student Learning Space<span class="sub2">MOE SLS lessons & resources</span></span>
     </a>
+    <a class="link-chip" href="https://www.seab.gov.sg" target="_blank" rel="noopener noreferrer">
+      <span class="ic" style="background:#2F5FA8">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="4" width="14" height="16" rx="1.5" fill="#fff"/><path d="M8 8h8M8 11h8M8 14h5" stroke="#2F5FA8" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </span>
+      <span class="meta">SEAB<span class="sub2">Exam timetables & registration</span></span>
+    </a>
     <a class="link-chip" href="https://open.spotify.com/search/lofi%20study%20focus" target="_blank" rel="noopener noreferrer">
       <span class="ic" style="background:#1DB954">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 9.5c3.2-1 8-.7 10.6.9M6.2 12.7c2.8-.8 6.8-.6 9.2.8M6 15.7c2.3-.6 5.4-.5 7.4.7" stroke="#fff" stroke-width="1.7" stroke-linecap="round" fill="none"/></svg>
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#fff" opacity="0"/><path d="M6.5 9.5c3.2-1 8-.7 10.6.9M6.2 12.7c2.8-.8 6.8-.6 9.2.8M6 15.7c2.3-.6 5.4-.5 7.4.7" stroke="#fff" stroke-width="1.7" stroke-linecap="round" fill="none"/></svg>
       </span>
       <span class="meta">Spotify<span class="sub2">Study & focus playlists</span></span>
     </a>
@@ -271,19 +288,41 @@
   <div class="grid">
     <div class="col">
       <div class="card">
+        <h2>Exam countdown</h2>
+        <div class="sub">Official SEAB written-exam dates. Your own subject combo may differ slightly.</div>
+        <div class="duration-row" style="margin-bottom:6px;">
+          <select id="examSelect" aria-label="Choose exam level" style="flex:1; min-width:0;">
+            <option value="custom" selected>My exams</option>
+            <option value="psle">PSLE</option>
+            <option value="nlevel">N-Level</option>
+            <option value="olevel">O-Level</option>
+            <option value="alevel">A-Level</option>
+          </select>
+        </div>
+        <div class="duration-row" id="customExamRow">
+          <div class="duration-field">
+            <label for="customExamStart">Starts</label>
+            <input type="date" id="customExamStart">
+          </div>
+          <div class="duration-field">
+            <label for="customExamEnd">Ends</label>
+            <input type="date" id="customExamEnd">
+          </div>
+        </div>
+        <div class="streak-hero">
+          <span class="streak-num" id="examDays">–</span>
+          <span class="streak-label" id="examDaysLabel">days to go</span>
+        </div>
+        <div class="streak-note" id="examDateRange">–</div>
+        <div class="streak-note"><a class="countdown-link" href="https://www.seab.gov.sg/important-dates-for-candidates/" target="_blank" rel="noopener noreferrer">Check your subject's exact date on SEAB →</a></div>
+      </div>
+
+      <div class="card">
         <h2>Study streak</h2>
         <div class="sub">Open Study Desk once a day to keep it alive.</div>
         <div class="streak-hero">
           <span class="streak-num" id="streakNum">–</span>
-          <span class="streak-label" id="streakLabel">day streak</span>
-        </div>
-        <div class="signin-row">
-          <button class="btn btn-ghost btn-sm" id="signInBtn" type="button">Sign in with Google</button>
-        </div>
-        <div class="streak-note" id="streakNote">Loading…</div>
-        <div class="leaderboard" id="leaderboard" style="margin-top:14px;">
-          <div class="lb-title">Leaderboard</div>
-          <div class="lb-empty" id="lbEmpty">Loading…</div>
+          <span class="streak-label">day streak</span>
         </div>
       </div>
 
@@ -366,32 +405,8 @@
     </div>
   </div>
 
-  <footer>Tasks, decks and timer settings are saved in this browser. Sign in to sync your streak and join the leaderboard.</footer>
+  <footer>Your decks, tasks, streak and timer settings are saved in this browser only.</footer>
 </div>
-
-<!--
-  ============================================================
-  FIREBASE SETUP — fill in firebaseConfig below to turn on the
-  streak leaderboard. See the setup guide for full steps.
-  Without it, the streak still works locally per-browser and
-  the leaderboard shows a "not configured" message.
-  ============================================================
--->
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<script>
-  // TODO: replace with your own project's config (Firebase console →
-  // Project settings → General → Your apps → SDK setup and configuration)
-  var firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
-</script>
 
 <script>
 (function(){
@@ -416,7 +431,6 @@
     d.setDate(d.getDate()+n);
     return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
   }
-  function yesterday(dateStr){ return addDays(dateStr, -1); }
   function uid(){ return Math.random().toString(36).slice(2,10); }
 
   document.getElementById("todayLine").textContent = new Date().toLocaleDateString(undefined,{weekday:"long", month:"long", day:"numeric"});
@@ -435,11 +449,11 @@
         ]
       },
       {
-        id:"deck-es", name:"Spanish Vocabulary (example)",
+        id:"deck-mtl", name:"Chinese Vocabulary — MTL (example)",
         cards:[
-          {id:uid(), front:"la biblioteca", back:"the library", box:2, due:t},
-          {id:uid(), front:"el plazo", back:"the deadline", box:0, due:t},
-          {id:uid(), front:"aprobar", back:"to pass (an exam)", box:1, due:addDays(t,2)}
+          {id:uid(), front:"图书馆 (túshūguǎn)", back:"the library", box:2, due:t},
+          {id:uid(), front:"截止日期 (jiézhǐ rìqī)", back:"the deadline", box:0, due:t},
+          {id:uid(), front:"及格 (jígé)", back:"to pass (an exam)", box:1, due:addDays(t,2)}
         ]
       }
     ];
@@ -859,12 +873,10 @@
   setMode("work");
   renderSessionCount();
 
-  // ================= STREAK & LEADERBOARD (Firebase) =================
+  // ================= STUDY STREAK (local to this browser) =================
   var streakNum = document.getElementById("streakNum");
-  var streakNote = document.getElementById("streakNote");
-  var signInBtn = document.getElementById("signInBtn");
-  var leaderboard = document.getElementById("leaderboard");
-  var lbEmpty = document.getElementById("lbEmpty");
+
+  function yesterday(dateStr){ return addDays(dateStr, -1); }
 
   function localCheckIn(){
     var local = loadJSON("sd_local_streak", {count:0, lastLogin:null});
@@ -877,130 +889,92 @@
     return local.count;
   }
 
-  function clearLeaderboardRows(){
-    leaderboard.querySelectorAll(".lb-row").forEach(function(el){ el.remove(); });
+  streakNum.textContent = String(localCheckIn());
+
+  // ================= EXAM COUNTDOWN (Singapore) =================
+  // Official 2026 written-exam windows from SEAB's published exam calendars
+  // (go.gov.sg/2026-psle-exam-cal, -n-level-, -o-level-, -a-level-exam-cal).
+  // Individual subject dates fall inside these windows and vary by
+  // combination — the SEAB link below shows a candidate's exact timetable.
+  var EXAMS = {
+    psle:   {name:"PSLE",    start:"2026-09-24", end:"2026-09-30"},
+    nlevel: {name:"N-Level", start:"2026-09-14", end:"2026-10-13"},
+    olevel: {name:"O-Level", start:"2026-10-19", end:"2026-11-10"},
+    alevel: {name:"A-Level", start:"2026-11-02", end:"2026-11-27"}
+  };
+  var examSelect = document.getElementById("examSelect");
+  var examDays = document.getElementById("examDays");
+  var examDaysLabel = document.getElementById("examDaysLabel");
+  var examDateRange = document.getElementById("examDateRange");
+  var customExamRow = document.getElementById("customExamRow");
+  var customExamStart = document.getElementById("customExamStart");
+  var customExamEnd = document.getElementById("customExamEnd");
+
+  var savedCustomExam = loadJSON("sd_exam_custom", null);
+  var defaultCustomExam = {start:"2026-10-02", end:"2026-10-09"};
+  var customExam = savedCustomExam || defaultCustomExam;
+  customExamStart.value = customExam.start;
+  customExamEnd.value = customExam.end;
+  EXAMS.custom = {name:"My exams", start:customExam.start, end:customExam.end};
+
+  function saveCustomExam(){
+    var s = customExamStart.value || defaultCustomExam.start;
+    var e = customExamEnd.value || s;
+    if(e < s) e = s;
+    customExam = {start:s, end:e};
+    EXAMS.custom = {name:"My exams", start:s, end:e};
+    saveJSON("sd_exam_custom", customExam);
   }
 
-  function renderLeaderboardRows(rows, myId){
-    clearLeaderboardRows();
-    if(rows.length === 0){
-      lbEmpty.hidden = false;
-      lbEmpty.textContent = "No streaks yet — be the first to check in today.";
-      return;
-    }
-    lbEmpty.hidden = true;
-    rows.forEach(function(r, i){
-      var row = document.createElement("div");
-      row.className = "lb-row" + (r.id === myId ? " me" : "");
-      var img = document.createElement("img");
-      img.className = "lb-avatar";
-      img.src = r.avatarUrl || ("https://api.dicebear.com/7.x/initials/svg?seed=" + encodeURIComponent(r.name || "?"));
-      img.alt = "";
-      var name = document.createElement("span");
-      name.className = "lb-name";
-      name.textContent = (r.name || "Someone") + (r.id === myId ? " (you)" : "");
-      var rank = document.createElement("span");
-      rank.className = "lb-rank";
-      rank.textContent = String(i+1);
-      var count = document.createElement("span");
-      count.className = "lb-count";
-      count.textContent = r.count + "🔥";
-      row.appendChild(rank);
-      row.appendChild(img);
-      row.appendChild(name);
-      row.appendChild(count);
-      leaderboard.appendChild(row);
+  [customExamStart, customExamEnd].forEach(function(inp){
+    inp.addEventListener("change", function(){
+      saveCustomExam();
+      if(examSelect.value === "custom") renderExamCountdown();
     });
+  });
+
+  function fmtDateRange(startStr, endStr){
+    var optsShort = {day:"numeric", month:"short"};
+    var optsLong = {day:"numeric", month:"short", year:"numeric"};
+    var s = new Date(startStr+"T00:00:00").toLocaleDateString(undefined, optsShort);
+    var e = new Date(endStr+"T00:00:00").toLocaleDateString(undefined, optsLong);
+    return s + " – " + e;
   }
 
-  var firebaseReady = false;
-  try{
-    firebaseReady = !!(window.firebase && firebaseConfig.apiKey !== "YOUR_API_KEY");
-    if(firebaseReady) firebase.initializeApp(firebaseConfig);
-  }catch(e){ firebaseReady = false; }
-
-  if(!firebaseReady){
-    streakNum.textContent = String(localCheckIn());
-    streakNote.textContent = "Add your Firebase config in the HTML to turn on the shared leaderboard.";
-    lbEmpty.textContent = "Leaderboard needs Firebase set up — see the setup guide.";
-    signInBtn.hidden = true;
-  } else {
-    var auth = firebase.auth();
-    var firestoreDb = firebase.firestore();
-    var currentUser = null;
-    var unsubLeaderboard = null;
-
-    function subscribeLeaderboard(myId){
-      if(unsubLeaderboard) unsubLeaderboard();
-      unsubLeaderboard = firestoreDb.collection("streaks").orderBy("count", "desc").limit(15)
-        .onSnapshot(function(qsnap){
-          var rows = [];
-          qsnap.forEach(function(doc){
-            var d = doc.data() || {};
-            rows.push({id:doc.id, count:d.count || 0, name:d.name || "", avatarUrl:d.photoURL || ""});
-          });
-          renderLeaderboardRows(rows, myId);
-        }, function(err){
-          lbEmpty.hidden = false;
-          lbEmpty.textContent = "Leaderboard unavailable right now.";
-        });
+  function renderExamCountdown(){
+    var ex = EXAMS[examSelect.value];
+    var t = todayStr();
+    var startMs = new Date(ex.start+"T00:00:00").getTime();
+    var todayMs = new Date(t+"T00:00:00").getTime();
+    var days = Math.round((startMs - todayMs) / 86400000);
+    if(days > 0){
+      examDays.textContent = String(days);
+      examDaysLabel.textContent = days === 1 ? "day to go" : "days to go";
+    } else if(t <= ex.end){
+      examDays.textContent = "•";
+      examDaysLabel.textContent = "exams in progress";
+    } else {
+      examDays.textContent = "✓";
+      examDaysLabel.textContent = "exams completed";
     }
-
-    function checkInAndSync(user){
-      currentUser = user;
-      signInBtn.textContent = "Sign out";
-      streakNote.textContent = "Signed in as " + (user.displayName || user.email || "you");
-      var t = todayStr();
-      var ref = firestoreDb.collection("streaks").doc(user.uid);
-      ref.get().then(function(snap){
-        var data = snap.exists ? snap.data() : null;
-        var count;
-        if(!data) count = 1;
-        else if(data.lastLogin === t) count = data.count;
-        else if(data.lastLogin === yesterday(t)) count = data.count + 1;
-        else count = 1;
-        streakNum.textContent = String(count);
-        if(!data || data.lastLogin !== t){
-          ref.set({
-            count: count,
-            lastLogin: t,
-            name: user.displayName || "",
-            photoURL: user.photoURL || ""
-          }, {merge:true}).catch(function(){});
-        }
-      });
-      subscribeLeaderboard(user.uid);
-    }
-
-    function showSignedOut(){
-      currentUser = null;
-      signInBtn.textContent = "Sign in with Google";
-      streakNum.textContent = String(localCheckIn());
-      streakNote.textContent = "Sign in to sync your streak and join the leaderboard.";
-      lbEmpty.hidden = false;
-      lbEmpty.textContent = "Sign in to see the leaderboard.";
-      if(unsubLeaderboard){ unsubLeaderboard(); unsubLeaderboard = null; }
-      clearLeaderboardRows();
-    }
-
-    signInBtn.addEventListener("click", function(){
-      if(currentUser){
-        auth.signOut();
-      } else {
-        var provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch(function(err){
-          streakNote.textContent = "Sign-in failed: " + err.message;
-        });
-      }
-    });
-
-    auth.onAuthStateChanged(function(user){
-      if(user) checkInAndSync(user);
-      else showSignedOut();
-    });
+    examDateRange.textContent = ex.name + " written exams: " + fmtDateRange(ex.start, ex.end);
   }
+
+  function refreshCustomRowVisibility(){
+    customExamRow.hidden = examSelect.value !== "custom";
+  }
+
+  var savedExam = loadJSON("sd_exam_level", "custom");
+  if(EXAMS[savedExam]) examSelect.value = savedExam;
+  refreshCustomRowVisibility();
+  examSelect.addEventListener("change", function(){
+    saveJSON("sd_exam_level", examSelect.value);
+    refreshCustomRowVisibility();
+    renderExamCountdown();
+  });
+  renderExamCountdown();
 
 })();
 </script>
-</body>
-</html>
+
+</body></html>
