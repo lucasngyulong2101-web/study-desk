@@ -127,7 +127,7 @@
   .duration-field label{ font-size:0.76rem; color:var(--muted); }
   .duration-field input{ width:52px; text-align:center; padding:5px 4px; font-family:"IBM Plex Mono",monospace; }
   .duration-field input[type="date"]{ width:132px; color-scheme:light dark; }
-  .mode-btn:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible{
+  .mode-btn:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, .flashcard:focus-visible{
     outline:2px solid var(--accent2); outline-offset:2px;
   }
 
@@ -158,22 +158,11 @@
   .session-dots span{ width:7px; height:7px; border-radius:50%; background:var(--surface2); border:1px solid var(--border); }
   .session-dots span.filled{ background:var(--accent2); border-color:var(--accent2); }
 
-  /* --- streak & leaderboard --- */
+  /* --- streak --- */
   .streak-hero{ display:flex; align-items:baseline; gap:8px; justify-content:center; padding-block:6px 4px; }
   .streak-num{ font-family:"Fraunces", serif; font-size:2.6rem; font-weight:600; line-height:1; }
   .streak-label{ color:var(--muted); font-size:0.85rem; }
   .streak-note{ text-align:center; color:var(--muted); font-size:0.78rem; margin-bottom:14px; }
-  .leaderboard{ display:flex; flex-direction:column; gap:2px; border-top:1px solid var(--border); padding-top:12px; }
-  .lb-title{ font-size:0.74rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin-bottom:8px; }
-  .lb-row{ display:flex; align-items:center; gap:10px; padding:6px 4px; border-radius:8px; }
-  .lb-row.me{ background:var(--surface2); }
-  .lb-rank{ width:18px; text-align:center; font-family:"IBM Plex Mono",monospace; font-size:0.78rem; color:var(--muted); flex-shrink:0; }
-  .lb-avatar{ width:24px; height:24px; border-radius:50%; flex-shrink:0; object-fit:cover; background:var(--surface2); }
-  .lb-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.88rem; }
-  .lb-count{ font-family:"IBM Plex Mono",monospace; font-size:0.8rem; color:var(--accent-ink); background:var(--accent); padding:2px 9px; border-radius:100px; flex-shrink:0; }
-  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .lb-count{ color:var(--bg); } }
-  :root[data-theme="dark"] .lb-count{ color:var(--bg); }
-  .lb-empty{ color:var(--muted); font-size:0.85rem; padding:4px; }
   .countdown-link{ color:var(--accent2-ink); font-weight:600; text-decoration:underline; text-underline-offset:3px; }
   @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .countdown-link{ color:var(--accent2); } }
   :root[data-theme="dark"] .countdown-link{ color:var(--accent2); }
@@ -251,8 +240,14 @@
   .card-list li .del:hover{ color:var(--danger); }
 
   footer{ text-align:center; color:var(--muted); font-size:0.78rem; padding-top:6px; }
+
+  .visually-hidden{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
 </style>
 
+<div class="visually-hidden" id="statusAnnouncer" role="status" aria-live="polite"></div>
 <div class="page">
   <div class="hero">
     <div>
@@ -616,21 +611,34 @@
     }
     var wrap = document.createElement("div");
     wrap.className = "flashcard" + (isFlipped ? " flipped" : "");
+    wrap.setAttribute("role", "button");
+    wrap.setAttribute("tabindex", "0");
+    wrap.setAttribute("aria-pressed", isFlipped ? "true" : "false");
+    wrap.setAttribute("aria-label", isFlipped ? "Answer: " + currentCard.back + ". Press to show question." : "Question: " + currentCard.front + ". Press to reveal answer.");
     wrap.innerHTML =
       '<div class="flashcard-inner">' +
         '<div class="face front">' + escapeHtml(currentCard.front) + '</div>' +
         '<div class="face back">' + escapeHtml(currentCard.back) + '</div>' +
       '</div>';
-    wrap.addEventListener("click", function(){
+    function flipCard(){
       isFlipped = !isFlipped;
       wrap.classList.toggle("flipped", isFlipped);
+      wrap.setAttribute("aria-pressed", isFlipped ? "true" : "false");
+      wrap.setAttribute("aria-label", isFlipped ? "Answer: " + currentCard.back + ". Press to show question." : "Question: " + currentCard.front + ". Press to reveal answer.");
       rateRow.style.visibility = isFlipped ? "visible" : "hidden";
+    }
+    wrap.addEventListener("click", flipCard);
+    wrap.addEventListener("keydown", function(e){
+      if(e.key === "Enter" || e.key === " " || e.key === "Spacebar"){
+        e.preventDefault();
+        flipCard();
+      }
     });
     flashStage.appendChild(wrap);
 
     var hint = document.createElement("div");
     hint.className = "flash-hint";
-    hint.textContent = "Tap the card to reveal the answer";
+    hint.textContent = "Tap the card (or press Enter) to reveal the answer";
     flashStage.appendChild(hint);
 
     var rateRow = document.createElement("div");
@@ -803,6 +811,11 @@
     });
   }
 
+  var statusAnnouncer = document.getElementById("statusAnnouncer");
+  function announce(msg){
+    statusAnnouncer.textContent = msg;
+  }
+
   function setMode(mode){
     currentMode = mode;
     totalSeconds = MODES[mode].minutes * 60;
@@ -869,6 +882,7 @@
     playChime();
     var title = finishedMode === "work" ? "Focus session done" : "Break's over";
     var body = finishedMode === "work" ? "Nice work — take a break." : "Time to get back to it.";
+    announce(title + ". " + body);
     try{
       if("Notification" in window && Notification.permission === "granted"){
         new Notification(title, {body: body});
@@ -895,11 +909,12 @@
     updateDisplay();
   }
 
-  startPauseBtn.addEventListener("click", function(){
+  function toggleTimer(){
     if(running){
       running = false;
       clearInterval(tickHandle);
       startPauseBtn.textContent = "Start";
+      announce(MODES[currentMode].label + " timer paused.");
     } else {
       if("Notification" in window && Notification.permission === "default"){
         Notification.requestPermission();
@@ -908,8 +923,10 @@
       running = true;
       startPauseBtn.textContent = "Pause";
       tickHandle = setInterval(tick, 1000);
+      announce(MODES[currentMode].label + " timer started, " + formatTime(remaining) + " remaining.");
     }
-  });
+  }
+  startPauseBtn.addEventListener("click", toggleTimer);
 
   resetBtn.addEventListener("click", function(){
     running = false;
@@ -917,12 +934,25 @@
     remaining = totalSeconds;
     startPauseBtn.textContent = "Start";
     updateDisplay();
+    announce(MODES[currentMode].label + " timer reset to " + formatTime(remaining) + ".");
   });
 
   modeBtns.forEach(function(btn){
     btn.addEventListener("click", function(){
       setMode(btn.getAttribute("data-mode"));
+      announce(MODES[btn.getAttribute("data-mode")].label + " mode selected, " + MODES[btn.getAttribute("data-mode")].minutes + " minutes.");
     });
+  });
+
+  document.addEventListener("keydown", function(e){
+    if(e.code !== "Space" && e.key !== " ") return;
+    var active = document.activeElement;
+    var tag = (active && active.tagName || "").toLowerCase();
+    var editable = active && active.isContentEditable;
+    var isRoleButton = active && active.getAttribute && active.getAttribute("role") === "button";
+    if(tag === "input" || tag === "textarea" || tag === "select" || tag === "button" || tag === "a" || isRoleButton || editable) return;
+    e.preventDefault();
+    toggleTimer();
   });
 
   refreshModeBtnLabels();
